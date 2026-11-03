@@ -33,7 +33,6 @@ You are at **Stage R**. The research document is a strong start, but it isn't ye
 - Duplicate detection, remittance cost and currency effects worked out in detail.
 - The regulatory line ("scenarios, not advice") drawn early.
 - Pricing, a competitor scan and a risk register.
-- **A working prototype already exists:** the Python CLI in `sms_finance/` parses USD/AED/INR SMS, sorts messages into expense, investment, income or redemption, and has tests. It is valuable as a parser reference and as the start of a test set (see Stage 5).
 
 ### R2. Missing requirements and gaps
 
@@ -77,7 +76,7 @@ Do these in order; each costs little and can stop a bad idea early.
 2. **Count the evidence.** For each pain point in the research, note how many people raised it *without prompting*. Keep features where ≥ 40% did; push the rest to "later".
 3. **Landing page and waitlist.** One page with the promise, three screenshots (mock-ups are fine) and an email sign-up. Share in UAE Indian community groups. Target: ≥ 300 sign-ups or a ≥ 10% sign-up rate from visits.
 4. **Price test.** On the waitlist confirmation, ask "Would you pay AED 9.99/month or AED 79/year?" with three answers (yes / maybe at a lower price / no).
-5. **Concierge test with the prototype.** For 5–10 friendly users, run the existing Python CLI on SMS exports they choose to share (masked, with consent, deleted afterwards). Show them the report. Note what surprised them and what was wrong.
+5. **Concierge test.** For 5–10 friendly users, build their monthly multi-currency summary by hand (a spreadsheet is fine) from SMS they choose to share (masked, with consent, deleted afterwards). Show them the result. Note what surprised them and what they would pay for.
 6. **Collect the SMS test set.** Gather 500+ masked bank SMS from UAE and Indian banks (the research asked for 50; aim higher). This becomes the parser's accuracy test.
 
 **Kill or pivot criteria:** fewer than 5 of 20 interviewees track money at all, *and* fewer than 100 sign-ups → narrow to one persona (e.g. salaried professionals only), or re-think.
@@ -144,7 +143,7 @@ Ideas to **avoid or delay**: anything that suggests specific funds or stocks (re
 | App | **Flutter** (Dart) with a small **Kotlin** plugin for SMS and notification access | One codebase for the later iOS app; SMS/notification reading has to be native Android anyway. Kotlin Multiplatform is the alternative if you prefer fully native UI and already know Kotlin |
 | State | Riverpod | Testable, widely used |
 | Local DB | SQLite via Drift, encrypted with SQLCipher; key in Android Keystore | Offline, encrypted at rest, typed queries, migrations |
-| Parser | Rule engine reading a signed JSON rule pack; falls back to on-device AI, then masked cloud AI with opt-in | Port the logic of `sms_finance/parser.py`; reuse its tests as the starting test set |
+| Parser | Rule engine reading a signed JSON rule pack; falls back to on-device AI, then masked cloud AI with opt-in | Known banks parse fast and privately; unknown formats still work |
 | Charts | fl_chart | Native Flutter, works on low-end phones |
 | Backend (thin) | Serverless functions (e.g. Cloudflare Workers or Supabase Edge) for: FX rates, rule pack hosting, billing webhooks, masked parse reports | Local-first app; avoid running servers in the MVP |
 | Sync (phase 2) | Supabase (Postgres) with end-to-end encrypted payloads, or skip sync until asked | Keep the MVP server-light |
@@ -238,7 +237,7 @@ Build the riskiest, most valuable parts first.
 | Sprint (2 weeks) | Deliverable |
 |---|---|
 | 1 | Project scaffold (`/scaffold`), CI, encrypted DB, design tokens, app lock |
-| 2 | Parser engine + rule pack + port of the Python prototype's rules; accuracy test running in CI |
+| 2 | Parser engine + rule pack for the first banks; accuracy test running in CI |
 | 3 | SMS reader and notification listener (Kotlin plugin), paste import, history import |
 | 4 | Accounts, multi-currency, FX rates offline, transaction list and edit |
 | 5 | Duplicate check, transfer matching, categories with learning |
@@ -345,7 +344,7 @@ A feature is done only when:
 | Test type | What | Tool |
 |---|---|---|
 | Unit | Parser rules, money maths, FX conversion, dedup scoring, simulator formulas | `flutter test` |
-| Parser accuracy | 500+ masked SMS with expected fields; report per bank; fails CI if accuracy drops | Custom test, seeded from `tests/` in the Python prototype |
+| Parser accuracy | 500+ masked SMS with expected fields; report per bank; fails CI if accuracy drops | Custom test built from the SMS test set collected in Stage R |
 | Widget + golden | Each screen in light/dark, LTR/RTL, large text | Flutter golden tests |
 | Integration / end-to-end | First-run, SMS capture, import, duplicate review, paywall | `integration_test` or Patrol, on emulators |
 | Device matrix | Low-end (2–3 GB RAM, Android 10) to latest Android; Samsung, Xiaomi, Pixel (OEM battery killers affect background capture) | Firebase Test Lab or real devices |
@@ -387,7 +386,6 @@ plancasting/                   Transmute's working folder
   businessplan/                Stage 0 input
   tech-stack.md                Stage 0 output
   brd/  prd/                   Stages 1–2
-sms_finance/  tests/           Python prototype (reference + test cases)
 CLAUDE.md                      AI working rules (Stage 5)
 ```
 
