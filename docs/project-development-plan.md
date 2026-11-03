@@ -8,7 +8,7 @@ This plan takes the project from an unfinished research idea to a launched, main
 
 | # | Stage | Main output | Tool | Rough time (solo + AI) |
 |---|---|---|---|---|
-| R | Research and idea validation | Validated business plan | You + Claude (this plan, sections R1–R6) | 2–4 weeks |
+| R | Research and idea validation | Validated business plan | You + Claude (this plan, sections R1–R3) | 2–4 weeks |
 | 0 | Business plan and tech stack | `plancasting/tech-stack.md` | Transmute `/tech-stack` | 2–3 days |
 | 1 | BRD | `plancasting/brd/` | Transmute `/brd` | 3–5 days |
 | 2 | Functional design (PRD/FDD) | `plancasting/prd/` | Transmute `/prd` then `/validate-specs` | 1 week |
@@ -18,7 +18,7 @@ This plan takes the project from an unfinished research idea to a launched, main
 | 6 | Testing and QA | Test reports, audit fixes | Transmute audits + mobile test stack | Runs alongside Stage 5, plus 2 weeks hardening |
 | 7 | Deployment and operations | Play Store release, monitoring | Play Console, CI/CD | 2–4 weeks staged rollout |
 
-You are at **Stage R**. The research document is a strong start, but it isn't yet a business plan the later stages can rely on. The gaps are listed in section R2.
+You are at **Stage R**. The research now covers metrics, MVP scope, edge cases and global requirements; what's missing is evidence from real users and a few open decisions (section R1).
 
 ---
 
@@ -26,111 +26,60 @@ You are at **Stage R**. The research document is a strong start, but it isn't ye
 
 **Goal:** prove that real people have this problem and would pay for this app, before writing requirements.
 
-### R1. What the research already covers well
+The research now targets **anyone whose money lives in more than one currency or country** (migrant workers, expat professionals, students, travelers, families at home, investors abroad), with **India–UAE as the launch corridor**. Its section *Gap analysis for a global BRD* already answers most of what this stage asked for. What remains is mainly **evidence from real users** and a few open decisions.
 
-- A clear target user (Indians working in the UAE) and a sharp promise: three currencies, one view, plus "what could this money become".
-- A realistic plan for when SMS access is refused (notification listener, email forwarding, statement import).
-- Duplicate detection, remittance cost and currency effects worked out in detail.
-- The regulatory line ("scenarios, not advice") drawn early.
-- Pricing, a competitor scan and a risk register.
+### R1. Status of the research
 
-### R2. Missing requirements and gaps
-
-These are the gaps found by checking the research against what a BRD and a production fintech app need. They are grouped by how much they matter.
-
-**Critical (must be decided before the BRD)**
-
-| # | Gap | Why it matters | What to add |
-|---|---|---|---|
-| G1 | **No user evidence** | All pain points are assumptions; nothing yet shows people would switch or pay | 15–20 user interviews and a waitlist test (R3) |
-| G2 | **No success metrics** | Nothing to judge the MVP against | North Star metric plus 4–6 KPIs (R5) |
-| G3 | **No MVP boundary** | The feature table has 40+ features across 4 phases; nothing is labelled "must have for launch" | MoSCoW list (R6) |
-| G4 | **Transaction edge cases not covered** | These break totals and user trust | Rules for refunds and reversals, partial refunds, card pre-auth holds, declined/failed transactions, cashback, card purchases converted to EMI, UPI autopay mandate setup (not a debit), ATM cash out (becomes "cash wallet"), credit card bill payment (a transfer, not spending) |
-| G5 | **No parsing accuracy target** | "Works" is not testable | e.g. ≥ 95% correct amount + currency + direction on a masked set of 500+ SMS; ≥ 85% correct category before user edits |
-| G6 | **Security requirements thin** | Finance app on phones that get lost or shared | Threat model; app lock (PIN + biometric); encrypted DB with key in Android Keystore; block screenshots on sensitive screens; root/tamper detection (warn, don't block); no OTP ever stored; encrypted backups with a recovery plan; follow OWASP MASVS |
-| G7 | **Consent and data lifecycle** | Required by India's DPDP rules and UAE PDPL | Consent screens per data source, consent log, retention period, one-tap delete, data export format, privacy policy text |
-| G8 | **AI processing rules undefined** | "Send to an AI model" may move personal data off the phone | Decide: on-device model first (e.g. Gemini Nano where the phone supports it), cloud only with masked text and opt-in; set a cost cap per user |
-
-**Important (add to the BRD)**
-
-| # | Gap | What to add |
+| Item | Status | Where |
 |---|---|---|
-| G9 | Non-functional requirements | Cold start < 2 s on a low-end phone (2–3 GB RAM); parse 10,000 SMS history in < 60 s; works fully offline; app size < 30 MB; battery impact negligible |
-| G10 | Languages and right-to-left | English first; Arabic needs full RTL layout; Hindi, Malayalam, Tamil later. Design for this from day one, even if translated later |
-| G11 | Accessibility | Large text, screen reader labels, colour-blind-safe charts (WCAG 2.2 AA) |
-| G12 | Merchant cleaning | A merchant dictionary ("AMZN MKTP" → Amazon, "CAREEM*RIDE" → Careem) shared between the parser and categories |
-| G13 | Exchange houses | Many UAE workers send money through exchange houses (and apps like Wise), not banks. Their receipts and SMS need parsers |
-| G14 | Cash and gold | Cash spending is common for the blue-collar persona; gold buying is common in the UAE. Both need manual or quick entry |
-| G15 | Billing and entitlements | Google Play Billing, trial rules, stopping trial abuse (one trial per account), grace period, restoring purchases |
-| G16 | Multi-device sync conflicts | If sync is offered, decide how conflicts are resolved (simplest: last write wins per field, with an edit history) |
-| G17 | Support and feedback | In-app "report a wrong parse" button that sends a masked sample with consent. This is also how the parser keeps improving |
-| G18 | Analytics without personal data | Product analytics and crash reports must never contain amounts, merchants or SMS text |
-| G19 | Policy re-check | Google Play's SMS/Call Log policy changed again in July 2026 (default-handler rules; financial-transaction exceptions). Re-read the current policy text before the BRD is final ([Google Play policy preview](https://support.google.com/googleplay/android-developer/answer/17225965)) |
-| G20 | UAE PDPL status | Sources disagree on whether the PDPL Executive Regulations have been issued; nothing confirms it from a primary UAE source ([Simmons & Simmons FAQ](https://www.simmons-simmons.com/en/publications/ckwugz8lu16rs0a44qvbqcbz9/uae-personal-data-protection-law-faqs)). Track as an open legal question |
+| Problem, personas, modules, regulation, pricing, competitors | Done | `project-research.md` |
+| Success metrics and North Star (G2) | Done | Research → Success metrics |
+| MVP boundary (G3) | Done | Research → MVP boundary |
+| Transaction edge-case rules (G4) | Done | Research → Edge-case rules |
+| Parsing accuracy, security, consent, AI targets (G5–G8) | Done (targets set) | Research → Critical gaps |
+| Global gaps: number/date formats, time zones, wallets, remittance channels, store taxes, country rules as data, eligibility, inflation (G21–G28) | Done (requirements written) | Research → Important gaps |
+| New ideas: rule file, "report wrong parse", salary-day plan, send-home signal, safe-to-spend widget, gratuity + return-home readiness | Done (rule file and "report wrong parse" are MVP Must) | Research → New ideas in detail |
+| **User evidence (G1)** | **Open** | R2 below |
+| **Open decisions** (launch corridors, Flutter vs native, cloud region, AI vendor and cost cap, prices, SMS at launch or later) | **Open** | Research → Open decisions |
+| **Legal:** UAE PDPL Executive Regulations still unpublished (G20); SMS permission rejections still happen in practice (G19) | **Open, tracked** | Research → Review findings |
 
-### R3. How to validate the idea (2–4 weeks)
+Corrections already made in the research, which this plan follows:
+- **SMS is optional at launch.** The MVP launches on notification capture plus paste and statement import; SMS is added if Google Play approves it.
+- **On-device AI is not the main parser.** Gemini Nano runs only on some recent phones and only in the foreground, so parsing is rules first, Nano as an optional speed-up, and masked cloud AI only with opt-in and a cost cap.
+- **Rule files must be pure data, never code,** to stay within Google Play's policy on downloaded code.
 
-Do these in order; each costs little and can stop a bad idea early.
+### R2. How to validate the idea (2–4 weeks)
 
-1. **Problem interviews (15–20 people).** Mix of the four personas. Ask about the past, not about your app: "Walk me through the last time you sent money home." "How do you know what you spent last month?" "What apps have you tried and why did you stop?" Write each one up in `docs/research/interviews/`.
-2. **Count the evidence.** For each pain point in the research, note how many people raised it *without prompting*. Keep features where ≥ 40% did; push the rest to "later".
-3. **Landing page and waitlist.** One page with the promise, three screenshots (mock-ups are fine) and an email sign-up. Share in UAE Indian community groups. Target: ≥ 300 sign-ups or a ≥ 10% sign-up rate from visits.
-4. **Price test.** On the waitlist confirmation, ask "Would you pay AED 9.99/month or AED 79/year?" with three answers (yes / maybe at a lower price / no).
-5. **Concierge test.** For 5–10 friendly users, build their monthly multi-currency summary by hand (a spreadsheet is fine) from SMS they choose to share (masked, with consent, deleted afterwards). Show them the result. Note what surprised them and what they would pay for.
-6. **Collect the SMS test set.** Gather 500+ masked bank SMS from UAE and Indian banks (the research asked for 50; aim higher). This becomes the parser's accuracy test.
+Follow the research's *User research plan*. In practice:
 
-**Kill or pivot criteria:** fewer than 5 of 20 interviewees track money at all, *and* fewer than 100 sign-ups → narrow to one persona (e.g. salaried professionals only), or re-think.
+1. **Interviews: 20–30 people across 3 corridors:** India–UAE (launch), Philippines–Gulf, and one Western corridor (e.g. Mexico–US or expats in the UK). Ask about past behaviour, not opinions: "How did you track money last month?" "Walk me through your last transfer home and what it cost." "Which apps did you try and why did you stop?" Write each up in `docs/research/interviews/`.
+2. **Count the evidence.** For each pain point, note how many people raised it without prompting. Keep features most people raised; move the rest to "later".
+3. **Waitlist page** in English, Arabic and one Asian language, with the price shown. Measure sign-ups per visitor and per corridor.
+4. **Concierge test.** For 5–10 friendly users, build their monthly multi-currency summary by hand (a spreadsheet is fine) from SMS they choose to share (masked, with consent, deleted afterwards). Note what surprised them and what they would pay for.
+5. **Collect the SMS test set:** at least 500 masked messages per launch country (the research's accuracy target), including exchange houses and wallets.
+6. **Close the open decisions** listed in the research, and record each one as an ADR (Stage 3).
 
-### R4. Suggested improvements and new ideas
+**Decision rule (from the research):** proceed if most interviewees describe the multi-currency problem unprompted and the waitlist shows clear interest at the listed price; otherwise narrow to the strongest corridor.
 
-Ranked by value for the target users and how cheaply they can be built.
+### R3. Further ideas not yet in the research
 
-| Idea | What it does | Why it's strong | Phase |
-|---|---|---|---|
-| **Parser rules as signed data** | Bank SMS templates live in a JSON rule pack the app downloads and verifies, not in app code | Fix a broken bank format in hours, without a Play Store release | MVP |
-| **"Report wrong parse" loop** | User taps a transaction → corrects it → masked template (no amounts, no names) is sent with consent | The parser improves from real use; a moat competitors lack for UAE banks | MVP |
-| **Salary-day plan** | When a salary SMS arrives: "AED 18,000 in. Last 3 months you sent AED 5,000 home and spent AED 9,200. Plan this month?" | Turns tracking into a monthly habit at the moment money arrives | MVP+ |
-| **Send-home timing signal** | Shows today's INR/AED rate against the 30- and 90-day average | Practical, not advice, and directly tied to remittances | 2 |
-| **Remittance cost league table** | Uses the user's *own* past transfers to show true cost per provider | Builds on the cost formula already designed | 2 |
-| **"Safe to spend" widget** | Home-screen widget: what's left this month after rent, EMIs and planned remittance | Daily reason to open the app | 2 |
-| **Hours-of-work view** | "This AED 450 dinner = 6 hours of work" from the user's salary | Simple, memorable, good for the blue-collar persona | 2 |
-| **Family view with one-way share** | Earner in UAE sees the India family's shared budget (each person consents) | Matches how NRI money actually works; strong reason for the Family plan | 3 |
-| **Gratuity + return-home readiness** | UAE end-of-service gratuity estimate plus "months of India expenses covered" | Unique to the Gulf expat case | 3 |
-| **WhatsApp-style quick entry** | "taxi 25 aed" typed or spoken in a chat box becomes a transaction | Fast cash entry, familiar format | 3 |
-| **Share a monthly card** | A privacy-safe image ("Saved 22% this month") to share | Free growth inside community groups | 3 |
-
-Ideas to **avoid or delay**: anything that suggests specific funds or stocks (regulated advice); credit scoring or lending (Google Play's personal loan rules are strict); reading contacts.
-
-### R5. Success metrics
-
-- **North Star:** monthly active users who have ≥ 80% of their transactions captured automatically.
-- Activation: % of new users who see their first monthly summary within 24 hours of install (target ≥ 60%).
-- Parse accuracy: % of auto-captured transactions not edited by the user (target ≥ 90%).
-- Retention: week-4 retention ≥ 35%.
-- Trial to paid: ≥ 5% (research model's low case), aim for 10%.
-- Trust: share of users who turn on cloud sync or "report wrong parse" (proxy for trust).
-
-### R6. Proposed MVP scope (Android only)
-
-| Must have | Should have | Later |
+| Idea | What it does | Phase |
 |---|---|---|
-| SMS capture (if approved) **and** notification listener + paste import | Statement CSV/PDF import | Bank data feeds (AA, AlTareq) |
-| Parser for top 10 UAE + top 10 Indian banks, rule pack updates | Screenshot import of holdings | Broker APIs (IBKR) |
-| Accounts with own currency; any home currency; daily FX rates offline | Subscriptions detector | Family plan |
-| Duplicate check + own-account transfer matching | Remittance cost per transfer | iOS app |
-| Categories with learn-from-correction | Goals | Languages beyond English and Arabic |
-| Monthly dashboard: income, spending, savings rate, by country | Travel mode | AI "ask your money" |
-| What-if simulator (SIP, lump sum, EMI vs save) with ranges and disclaimer | | |
-| App lock, encrypted DB, export, delete account | | |
-| Free trial + Premium via Play Billing | | |
+| Remittance cost league table | Uses the user's own past transfers to rank providers by true cost (builds on G24) | 2 |
+| Hours-of-work view | "This AED 450 dinner = 6 hours of work", from the user's salary | 2 |
+| Family view with one-way share | Earner abroad sees the family's shared budget at home, with each person's consent | 3 |
+| Chat-style quick entry | "taxi 25 aed" typed or spoken becomes a transaction | 3 |
+| Shareable monthly card | Privacy-safe image ("Saved 22% this month") for community groups | 3 |
 
-**Gate R → 0:** interviews done and written up; top 3 pains confirmed; MVP list agreed; metrics set; SMS test set ≥ 200 samples; open legal questions listed.
+Avoid or delay: anything that names specific funds or stocks (regulated advice), lending or credit scoring (strict Google Play personal-loan rules), reading contacts.
+
+**Gate R → 0:** interviews done and written up; decision rule met; open decisions closed; SMS test set started (≥ 200 samples); legal questions have an owner and date.
 
 ---
 
 ## Stage 0: Business plan and tech stack
 
-**Input:** the research doc updated with R2–R6.
+**Input:** the research doc plus the validation results from Stage R.
 **Output:** `plancasting/businessplan/` (the business plan) and `plancasting/tech-stack.md`.
 
 1. Turn the research into a business plan: copy `docs/project-research.md` plus the validation results into `plancasting/businessplan/` (Transmute reads `.md` or `.pdf` files from there).
@@ -143,7 +92,7 @@ Ideas to **avoid or delay**: anything that suggests specific funds or stocks (re
 | App | **Flutter** (Dart) with a small **Kotlin** plugin for SMS and notification access | One codebase for the later iOS app; SMS/notification reading has to be native Android anyway. Kotlin Multiplatform is the alternative if you prefer fully native UI and already know Kotlin |
 | State | Riverpod | Testable, widely used |
 | Local DB | SQLite via Drift, encrypted with SQLCipher; key in Android Keystore | Offline, encrypted at rest, typed queries, migrations |
-| Parser | Rule engine reading a signed JSON rule pack; falls back to on-device AI, then masked cloud AI with opt-in | Known banks parse fast and privately; unknown formats still work |
+| Parser | Rule engine reading a signed JSON rule pack (pure data, never code); Gemini Nano as an optional speed-up on supported phones; masked cloud AI only with opt-in and a cost cap | Works on budget phones; known banks parse fast and privately; unknown formats still work |
 | Charts | fl_chart | Native Flutter, works on low-end phones |
 | Backend (thin) | Serverless functions (e.g. Cloudflare Workers or Supabase Edge) for: FX rates, rule pack hosting, billing webhooks, masked parse reports | Local-first app; avoid running servers in the MVP |
 | Sync (phase 2) | Supabase (Postgres) with end-to-end encrypted payloads, or skip sync until asked | Keep the MVP server-light |
@@ -159,7 +108,7 @@ Ideas to **avoid or delay**: anything that suggests specific funds or stocks (re
 
 Run `/brd`. It reads the business plan and tech stack and writes `plancasting/brd/`.
 
-**Check that the BRD contains:** business goals and KPIs (R5); personas; scope in/out (R6); business rules (edge cases G4, duplicate rules, currency rules, remittance cost formula, simulator rules and disclaimers); regulatory requirements (SEBI advice line, DPDP, PDPL, Play policy); NFRs (G9–G11); risks and assumptions.
+**Check that the BRD contains:** business goals and KPIs; all seven personas; scope in/out (the research's MVP boundary); business rules (edge-case rules, duplicate rules, currency rules, remittance cost, gratuity and safe-to-spend formulas, simulator rules and disclaimers); country rules as versioned data (G26); regulatory requirements (SEBI advice line, DPDP, PDPL, GDPR baseline, Play policy); NFRs (G9–G11, G21–G22); risks and assumptions.
 
 Transmute marks guesses as `ASSUMPTION` and computes an assumption volume. **Get it below 30%** by answering the open questions; above that it flags the BRD as critical.
 
@@ -274,7 +223,9 @@ Pick **one** spec framework per stage to avoid conflicting file layouts: Transmu
 - Never log amounts, merchants or message text.
 - Every parser change adds or updates test cases; accuracy must not drop.
 - No investment advice wording; projections always show a range and the disclaimer.
-- Money is stored as integer minor units (fils, paise, cents) plus currency code, never as floats.
+- Money is stored as integer minor units plus an ISO 4217 currency code (some currencies have 0 or 3 decimals), never as floats.
+- Times are stored in UTC plus the local offset; months follow the user's home time zone.
+- Rule packs and country packs are data only; never download or run code.
 - Database changes need a migration and a migration test.
 
 **Daily loop for each feature**
@@ -330,7 +281,7 @@ A feature is done only when:
 - [ ] All acceptance criteria have passing automated tests.
 - [ ] `flutter analyze` is clean (use a strict lint set such as `very_good_analysis`).
 - [ ] Unit test coverage ≥ 80% overall; ≥ 95% for the parser, money maths and dedup.
-- [ ] Parser accuracy on the SMS test set did not drop.
+- [ ] Parser accuracy on the SMS test set did not drop (target ≥ 95% amount + currency + direction; < 0.5% wrong merges).
 - [ ] No personal data in logs, crash reports or analytics.
 - [ ] Works offline; handles errors with a clear message.
 - [ ] Screen works with large text, screen reader and Arabic RTL layout.
@@ -344,7 +295,7 @@ A feature is done only when:
 | Test type | What | Tool |
 |---|---|---|
 | Unit | Parser rules, money maths, FX conversion, dedup scoring, simulator formulas | `flutter test` |
-| Parser accuracy | 500+ masked SMS with expected fields; report per bank; fails CI if accuracy drops | Custom test built from the SMS test set collected in Stage R |
+| Parser accuracy | ≥ 500 masked messages per launch country with expected fields; report per bank and country pack; fails CI if accuracy drops | Custom test built from the SMS test set collected in Stage R |
 | Widget + golden | Each screen in light/dark, LTR/RTL, large text | Flutter golden tests |
 | Integration / end-to-end | First-run, SMS capture, import, duplicate review, paywall | `integration_test` or Patrol, on emulators |
 | Device matrix | Low-end (2–3 GB RAM, Android 10) to latest Android; Samsung, Xiaomi, Pixel (OEM battery killers affect background capture) | Firebase Test Lab or real devices |
@@ -356,7 +307,7 @@ A feature is done only when:
 
 **Note on Transmute's Stage 6:** `/verify`, `/optimize` and `/smoke` assume a web app in a browser (`localhost`, Lighthouse). For this Android app, use the checklists in those skills but run them against emulators and the tools above.
 
-**Gate 6 → 7:** all must-have tests green; no critical or high security findings open; beta crash-free rate ≥ 99.5%; parse accuracy meets the R2 target; `/prelaunch` checklist passed.
+**Gate 6 → 7:** all must-have tests green; external test against OWASP MASVS passed with no critical or high findings open; beta crash-free rate ≥ 99.5%; parse accuracy and monthly totals (within 1% of bank statements) meet the research targets; `/prelaunch` checklist passed.
 
 ---
 
@@ -391,11 +342,11 @@ CLAUDE.md                      AI working rules (Stage 5)
 
 ## Next actions (this week)
 
-- [ ] Write the interview script and book the first 5 interviews (R3).
+- [ ] Write the interview script and book the first 5 interviews across the 3 corridors (R2).
 - [ ] Start collecting masked SMS samples, aiming for 200 by the end of Stage R.
 - [ ] Put up the landing page and waitlist.
-- [ ] Add R2–R6 decisions to `project-research.md` as they're made.
-- [ ] Re-read the current Google Play SMS policy and note what applies (G19).
+- [ ] Close the research's open decisions and record each as an ADR.
+- [ ] Track the UAE PDPL regulations and Google Play SMS policy (G19, G20).
 - [ ] When the Stage R gate passes: copy the research into `plancasting/businessplan/` and run `/tech-stack`.
 
 ## Sources

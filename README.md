@@ -1,6 +1,6 @@
 # SMS Finance Tracker & Investment Simulator
 
-An Android-first app (planned) that reads bank SMS in USD, AED and INR, shows all spending in one home currency, and simulates what the money could become if invested.
+An Android-first app (planned) for anyone whose money lives in more than one currency or country. It reads bank SMS, notifications, statements and screenshots in any currency, shows everything in one home currency, and simulates what the money could become if invested. India–UAE is the launch market.
 
 The project is in the research and planning stage. No app code has been written yet.
 

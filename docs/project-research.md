@@ -4,35 +4,40 @@ Nov 2, 2026 · @Sridharan
 
 ## Executive summary
 
-Build an Android-first app that reads bank SMS in USD, AED and INR, turns them into one multi-currency spending view, and shows what the money could become if invested instead. The first users are Indians working in the UAE (NRIs) who earn in AED or USD, spend in both countries, and send money home every month. The design is global: anyone in any country picks a home currency, adds banks in any currency, and imports by SMS, paste or file (see Global design).
+Build an app for anyone whose money lives in more than one currency or country: migrant workers, expat professionals, international students, frequent travelers, families supporting relatives abroad, and people investing outside their home country. It reads bank SMS, notifications, statements and screenshots in any currency, turns them into one view in the user's chosen home currency, and shows what the money could become if invested instead. India–UAE (INR, AED, USD) is the launch market and the worked example in this document, because it is one of the world's largest money corridors; the same design works for any country and currency pair (see Global design).
 
 The app has four parts:
 
 1. **Capture** — read bank and card SMS (and later, bank data feeds) automatically.
 2. **Understand** — convert every amount to one home currency and sort spending into categories.
-3. **Compare** — simulate the same money in Indian stocks and funds (Groww), US and global stocks (IBKR), land in India, or paying an EMI versus saving first.
+3. **Compare** — simulate the same money in home-country and international stocks and funds (e.g. Groww in India, IBKR worldwide), property at home or abroad, or paying an EMI versus saving first.
 4. **Plan** — set goals (house, education, retirement) and track progress.
 
-The core promise: *"See where your money went in three currencies, and what it could become."* The app should show scenarios, not give personal buy or sell advice, because that is a regulated activity in India (see Regulatory section).
+The core promise: *"See where your money went, in every currency, and what it could become."* The app should show scenarios, not give personal buy or sell advice, because that is a regulated activity in India (see Regulatory section).
 
 ## Problem and target users
 
-About 4.3 million Indians live in the UAE, and the UAE sends about 19.2% of India's remittances — the second-largest source ([Indian Embassy UAE](https://www.indembassyuae.gov.in/page/bilateral-economic-and-commercial-relations/)). India's inward remittances hit a record USD 135.46 billion in FY2024–25 ([Gulf News, citing RBI](https://gulfnews.com/gn-focus/how-digital-integration-and-exchange-rates-boost-uae-india-money-transfers-1.500425616)).
+This is a global problem. Migrants sent USD 728.6 billion home to low- and middle-income countries in 2025, nearly double a decade earlier, and about 220 million migrants and diaspora members support over 1.1 billion relatives ([IFAD, via Rudaw](https://rudaw.net/english/categories/world/1079300)). Add expat professionals, international students, travelers and anyone investing abroad, and the audience is everyone whose money lives in more than one currency. India is the natural launch market: it received the most remittances of any country in 2024, about USD 129 billion ([Statista, World Bank data](https://www.statista.com/chart/amp/13659/the-countries-who-depend-on-remittances-the-most)).
+
+In the launch corridor, about 4.3 million Indians live in the UAE, and the UAE sends about 19.2% of India's remittances — the second-largest source ([Indian Embassy UAE](https://www.indembassyuae.gov.in/page/bilateral-economic-and-commercial-relations/)). India's inward remittances hit a record USD 135.46 billion in FY2024–25 ([Gulf News, citing RBI](https://gulfnews.com/gn-focus/how-digital-integration-and-exchange-rates-boost-uae-india-money-transfers-1.500425616)).
 
 The pain points this app solves:
 
 - **Money is scattered.** Salary arrives in AED, card spending is in AED and USD, family spending and EMIs are in INR. SMS alerts arrive from different banks in different formats.
-- **No single view.** Indian apps track INR only; UAE apps track AED only. Nobody shows net worth across both countries.
+- **No single view.** Most finance apps work in one country and one currency (Indian apps track INR, UAE apps track AED). Few show net worth across countries.
 - **Hidden remittance cost.** People see the amount sent, not the fee plus the exchange-rate markup.
 - **No "what if".** People rarely see what a monthly AED 1,000 on food delivery could grow to if invested.
 - **Confusing NRI rules.** NRE vs NRO accounts, property rules and taxes in two countries.
 
-| Persona | Income | Main need |
+| Persona | Example | Main need |
 | --- | --- | --- |
-| Blue-collar worker in UAE | AED 1,500–4,000/month | Track remittances, save, avoid high fees |
-| Salaried professional in UAE | AED 10,000–40,000/month | Multi-currency budget, invest in India and US |
-| Family in India receiving money | INR | See how money sent is used, EMIs |
-| Returning NRI | AED + INR assets | Plan land, property and retirement in India |
+| Migrant worker | Indian, Filipino or Pakistani worker in the Gulf; Mexican worker in the US | Track money sent home, cut transfer fees, save |
+| Expat professional | Salary in AED, GBP, USD or SGD; spending and investments in two or more countries | One budget and net worth across countries |
+| Family at home | Receives money in INR, PHP, MXN or another currency | See how money sent is used; manage bills and EMIs |
+| International student | Fees in AUD, CAD or GBP; support from parents in home currency | Budget across currencies, rent, part-time income |
+| Frequent traveler or digital nomad | Spends in many currencies a year | Trip budgets, card markup, totals in home currency |
+| Investor with foreign holdings | Shares in the US, India, Europe | Portfolio value and currency effect in home currency |
+| Returning migrant | Assets abroad and at home | Plan property, retirement and the move back |
 
 ## Module 1: SMS capture and parsing
 
@@ -192,11 +197,11 @@ Each insight ends with one button: **"What if I invest this?"**, which opens Mod
 
 The simulator takes an amount found in Module 3 and projects it across five paths, always in the user's home currency and with currency change included.
 
-**Path A — Indian stocks and mutual funds (Groww and similar).** Groww now opens NRI accounts on the Non-PIS NRO route, covering stocks, F&O, mutual funds, ETFs and IPOs, but not margin trading or commodities ([Groww NRI page](https://groww.in/open-nri-demat-account)). Repatriable stock investing from an NRE account normally needs the RBI's Portfolio Investment Scheme (PIS); mutual funds do not need PIS ([Motilal Oswal, 2026](https://www.motilaloswal.com/learning-centre/2026/3/nri-demat-account-regulations-in-2026-key-changes-to-watch)). The app should show which route the user is on, because it decides whether money can go back to the UAE freely.
+**Path A — Home-country stocks and funds (India example: Groww and similar).** Groww now opens NRI accounts on the Non-PIS NRO route, covering stocks, F&O, mutual funds, ETFs and IPOs, but not margin trading or commodities ([Groww NRI page](https://groww.in/open-nri-demat-account)). Repatriable stock investing from an NRE account normally needs the RBI's Portfolio Investment Scheme (PIS); mutual funds do not need PIS ([Motilal Oswal, 2026](https://www.motilaloswal.com/learning-centre/2026/3/nri-demat-account-regulations-in-2026-key-changes-to-watch)). The app should show which route the user is on, because it decides whether money can go back to the UAE freely.
 
 **Path B — International stocks via IBKR.** For a UAE resident, USD investing has no currency risk against AED because of the peg. The simulator uses USD returns directly. Interactive Brokers offers a public API (details in Integrations).
 
-**Path C — Land and property in India.** NRIs may buy residential and commercial property and non-agricultural plots, and can take Indian home loans, but cannot buy agricultural land, plantation property or farmhouses ([Housing.com](https://housing.com/news/can-nri-purchase-property-india/), [Assetly, FEMA rule](https://assetlyhq.com/blog/can-nri-buy-agricultural-land-india-fema/)). The app must warn when a user tags a property as "farm" or "agricultural". Model inputs: price, down payment, loan rate and tenure, stamp duty and registration, yearly price growth, rent, maintenance, and TDS on sale.
+**Path C — Land and property (India example; each country pack adds its own rules).** NRIs may buy residential and commercial property and non-agricultural plots, and can take Indian home loans, but cannot buy agricultural land, plantation property or farmhouses ([Housing.com](https://housing.com/news/can-nri-purchase-property-india/), [Assetly, FEMA rule](https://assetlyhq.com/blog/can-nri-buy-agricultural-land-india-fema/)). The app must warn when a user tags a property as "farm" or "agricultural". Model inputs: price, down payment, loan rate and tenure, stamp duty and registration, yearly price growth, rent, maintenance, and TDS on sale.
 
 **Path D — EMI products.** Compare "buy now on EMI" with "save first, then buy". Show total interest and processing fees, and flag "no-cost EMI" offers where the discount is lost.
 
@@ -318,6 +323,113 @@ Raw SMS never leaves the device; only parsed transactions move, and only if the 
 | Auth and security | Phone/email login, biometric app lock, end-to-end encrypted backup | Finance data needs strong protection |
 | Hosting | A UAE or India cloud region | Helps with data-residency questions under PDPL/DPDP |
 
+## Gap analysis for a global BRD
+
+The research is strong on ideas but not yet ready for a business requirements document (BRD): it lacks user evidence, measurable targets, a fixed MVP boundary, and rules for messy real-world transactions. This section checks the review findings (G1–G20), corrects three of them with current sources, adds eight gaps that only appear when the app is global, and supplies the missing pieces: user research plan, metrics, MVP list and edge-case rules.
+
+### Review findings checked against current sources
+
+| Item | Review said | What the research found (Nov 2026) | Action |
+| --- | --- | --- | --- |
+| G19 Google Play SMS policy | Changed again in July 2026 (default-handler rules; financial exceptions) | Partly correct. The [July 15, 2026 update](https://support.google.com/googleplay/android-developer/answer/17134731?hl=en) removed phone-call account verification as a use for READ\_CALL\_LOG; the SMS rules for budget apps did not change. "SMS-based money management" is still a listed exception, including in the [policy preview effective 27 January 2027](https://support.google.com/googleplay/android-developer/answer/17225965). Rejections still happen in practice: one finance-app developer reported being told SMS reading for financial data did not qualify ([DEV Community](https://dev.to/zeta_byte/ive-been-working-on-a-personal-finance-app-called-finvantage-and-i-recently-hit-a-roadblock-4mjh)) | Keep SMS as optional; launch on notification + import capture; re-read policy before submitting |
+| G20 UAE PDPL status | Sources disagree | Confirmed open. As of October 2026 the Executive Regulations were not on the UAE legislation portal, and the six-month compliance window starts only when they are issued ([Trustable](https://trytrustable.com/uae-pdpl)). In June 2026 the UAE created the Federal Authority for Artificial Intelligence and Data, expected to finalise them ([Skimbox](https://www.skimbox.co/en/resources/blogs/pdpl-compliance-uae)). Some vendor blogs claim they were issued but cite no official text | Track as an open legal question; meet a GDPR-style baseline now |
+| G8 On-device AI | Gemini Nano first | Not suitable as the main parser for a global, budget-phone audience. Gemini Nano's Prompt API runs only on listed recent devices (e.g. Pixel 9/10, Galaxy S26, some Xiaomi, vivo, Honor phones), is in beta, and only works while the app is in the foreground ([Google ML Kit GenAI](https://developers.google.com/ml-kit/genai)) | Rules-based parsers first; Nano as an optional speed-up on supported phones; cloud AI only with masked text, opt-in, and a per-user cost cap |
+
+### Critical gaps (decide before the BRD)
+
+| # | Gap | Global requirement | Suggested acceptance target |
+| --- | --- | --- | --- |
+| G1 | No user evidence | 20–30 interviews across 3 corridors, plus a waitlist test in 3 languages (see User research plan) | Clear yes/no on: do people track today, would they switch, would they pay |
+| G2 | No success metrics | North Star plus KPIs (see Success metrics) | Every MVP feature linked to at least one KPI |
+| G3 | No MVP boundary | MoSCoW list (see MVP boundary) | Nothing outside "Must" blocks launch |
+| G4 | Transaction edge cases | Rules for refunds, holds, EMIs, transfers, wallets (see Edge-case rules) | Monthly totals match bank statements within 1% on test accounts |
+| G5 | No parsing accuracy target | Accuracy measured per country pack, on masked real samples | ≥ 95% correct amount + currency + direction on ≥ 500 messages per launch country; ≥ 85% correct category before user edits; < 0.5% wrong merges |
+| G6 | Security thin | Threat model; PIN + biometric lock; encrypted database with key in Android Keystore; block screenshots on sensitive screens; root/tamper warning; never store OTPs; encrypted backups with recovery. Test against OWASP MASVS v2.1 (8 categories, 24 controls) ([Appknox](https://www.appknox.com/cyber-security-jargons/masvs)) | External test against MASVS before launch |
+| G7 | Consent and data lifecycle | One global baseline set to the strictest of GDPR (Europe), India DPDP and UAE PDPL; consent screen per data source; consent log; retention periods; one-tap delete; export as CSV/JSON; users 18+ only | Delete completes within 30 days, export within minutes |
+| G8 | AI processing rules | As corrected above: on-phone rules first, masked cloud AI only with opt-in | Zero raw SMS or account numbers sent off the phone |
+
+### Important gaps (add to the BRD)
+
+| # | Gap | What to add |
+| --- | --- | --- |
+| G9 | Non-functional requirements | Cold start < 2 s on a 2–3 GB RAM phone; import 10,000 messages in < 60 s; fully offline; app < 30 MB; negligible battery use |
+| G10 | Languages and right-to-left | English first; layout ready for Arabic (RTL) from day one; Hindi, Malayalam, Tamil, Tagalog, Urdu, Spanish via country packs |
+| G11 | Accessibility | Large text, screen-reader labels, colour-blind-safe charts (WCAG 2.2 AA) |
+| G12 | Merchant cleaning | Shared merchant dictionary per country ("AMZN MKTP" → Amazon, "CAREEM\*RIDE" → Careem) |
+| G13 | Exchange houses and transfer apps | Parsers for exchange houses and money-transfer apps, not just banks |
+| G14 | Cash and gold | Quick entry for cash spending and gold purchases |
+| G15 | Billing and entitlements | Store billing, one trial per account, grace period, restore purchases |
+| G16 | Multi-device sync conflicts | Last write wins per field, with edit history |
+| G17 | Support and feedback | "Report a wrong parse" button that sends a masked sample with consent |
+| G18 | Analytics without personal data | No amounts, merchants or message text in analytics or crash reports |
+| G19 | Policy re-check | See correction above |
+| G20 | UAE PDPL status | See correction above |
+| G21 | Number, date and currency formats (new, global) | Parse 1,234.56 and 1.234,56; lakh grouping (1,23,456); Arabic-Indic digits; DD/MM vs MM/DD dates; currencies with 0 decimals (JPY) or 3 (KWD, BHD, OMR). Store amounts as integer minor units plus ISO 4217 code |
+| G22 | Time zones (new) | Store time in UTC plus local offset; month boundaries follow the user's home time zone |
+| G23 | Mobile money and wallets (new) | Parsers for wallet and mobile-money alerts (e.g. M-Pesa, GCash, UPI apps); wallet top-ups treated as transfers |
+| G24 | Remittance channels vary by country (new) | Compare banks, exchange houses and transfer apps per corridor. Cost differences are large: the World Bank's Q1 2025 data put the global average cost of sending USD 200 at 6.49% and banks at 14.55% (as reported by [this summary](https://website-2u6.pages.dev/blog/hidden-fees)) |
+| G25 | Store pricing and taxes per country (new) | Local prices per store country; confirm where stores collect VAT/GST and where the business must register |
+| G26 | Country rules as data (new) | Investment limits, property rules (e.g. NRI farmland ban), tax-residency days and privacy rules stored as versioned country data, not code |
+| G27 | Availability and eligibility (new) | Launch countries list; 18+ only; respect store availability limits |
+| G28 | High-inflation currencies (new) | Option to view totals adjusted for inflation; frequent rate updates |
+
+### User research plan (closes G1)
+
+- **Who:** 20–30 people across three corridors — India–UAE (launch), Philippines–Gulf, and one Western corridor (e.g. Mexico–US or expats in the UK). Mix of migrant workers, professionals and students.
+- **Ask about past behaviour, not opinions:** how they tracked money last month, last transfer home and its cost, apps tried and why they stopped.
+- **Waitlist test:** one landing page in English, Arabic and one Asian language, with the price shown; measure sign-ups per visitor and per corridor.
+- **Decision rule:** proceed if most interviewees describe the multi-currency problem unprompted and the waitlist shows clear interest at the listed price; otherwise narrow to the strongest corridor.
+
+### Success metrics (closes G2)
+
+**North Star:** users whose money is "fully tracked" — at least 80% of their transactions in the last 30 days captured automatically and categorised.
+
+| KPI | Definition | Suggested MVP target |
+| --- | --- | --- |
+| Activation | Connects one source and sees a first dashboard within 10 minutes | ≥ 60% of installs |
+| Auto-capture rate | Transactions captured without manual entry | ≥ 80% |
+| Parse accuracy | Correct amount + currency + direction | ≥ 95% |
+| 30-day retention | Users active on day 30 | ≥ 35% |
+| Trial-to-paid | Trials that become paid | 5–10% |
+| Money found | Average yearly savings identified per user (fees, subscriptions, transfer costs) | Track; no target until baseline |
+| Stability | Crash-free sessions | ≥ 99.5% |
+
+### MVP boundary (closes G3)
+
+| Priority | Features |
+| --- | --- |
+| Must | Android app; notification capture, paste and statement import (SMS only if approved); launch country pack (UAE and Indian banks, exchange houses); any home currency; duplicate check and transfer matching; categories with corrections; monthly dashboard; remittance cost tracker; SIP/EMI what-if; app lock and encrypted storage; consent, export and delete; trial and subscription; "report wrong parse" |
+| Should | Screenshot import of holdings; travel mode; subscription detector; cash wallet; Arabic-ready layout |
+| Could | Email forwarding; goals; IBKR Flex and mutual fund CAS import; home-screen widgets |
+| Won't (MVP) | Bank data feeds; iPhone app; AI chat; family sharing; advice tier; tax reports; web dashboard |
+
+### Edge-case rules (closes G4)
+
+| Case | Rule |
+| --- | --- |
+| Refund or reversal | Linked to the original; reduces that spend; never counted as income |
+| Partial refund | Linked; reduces the original by the refunded amount |
+| Card hold (hotel, fuel, rental) | Shown as pending; replaced by the final amount when it posts; dropped if released |
+| Declined or failed payment | Not counted; kept as a note only |
+| Cashback and rewards | Counted as "rewards" income, or as a spend reduction (user setting) |
+| Card purchase converted to EMI | Purchase counted once as spending; instalments are loan repayments; interest and fees are spending |
+| Autopay or mandate set-up | Not a transaction |
+| ATM withdrawal | Transfer to a "cash wallet"; cash spending entered later |
+| Credit card bill payment | Transfer between own accounts |
+| Wallet top-up or currency conversion between own accounts | Transfer; any conversion cost recorded as a fee |
+| Loan or salary advance received | Increases a loan balance; not income |
+| Dispute or chargeback | Held as "in dispute" until resolved |
+| Re-sent or duplicate alert | Merged by reference number |
+| Foreign transaction fee or dynamic currency conversion | Separate fee line linked to the purchase |
+
+### Open decisions before the BRD is final
+
+- Launch corridor(s) and the first country packs after India–UAE.
+- Flutter or native Android for the MVP.
+- Cloud region(s) and data-residency approach.
+- Cloud AI vendor and per-user cost cap.
+- Prices per country and whether to apply for SMS permission at launch or after.
+
 ## Future features: the full vision
 
 The long-term app is a "money home" for anyone living across countries: capture everything, understand it in one currency, and plan the future. The Phase column matches the Roadmap below.
@@ -363,6 +475,35 @@ The long-term app is a "money home" for anyone living across countries: capture 
 | Platform | Country packs | Bank formats, presets and rules per new country | 4 |
 | Platform | Data export and delete | Full export any time; delete account and data | 1 |
 
+### New ideas in detail
+
+Six ideas added in November 2026. Two of them (the rule file and "report wrong parse") work as a pair and belong in the MVP, because together they let parsing improve every week without a store release.
+
+| Idea | How it works | Rules and risks | Phase |
+| --- | --- | --- | --- |
+| Bank formats as a downloadable rule file | Each country pack ships its bank rules (sender IDs, text patterns, field mapping, test samples) as a signed data file. The app checks for updates daily, verifies the signature, runs the built-in test samples, then switches; it rolls back automatically if results get worse | The file must be pure data, never code: Google Play bans apps that download executable code such as dex files or native code from outside Play ([Device and Network Abuse policy](https://support.google.com/googleplay/android-developer/answer/9888379?hl=en)) | 1 (Must) |
+| "Report wrong parse" button | One tap on a wrong transaction. The app masks the message (digits → #, names → MERCHANT, account → XXXX), keeps only the sender and the shape of the text, and shows the user exactly what will be sent. Reports are grouped on the server, turned into a new rule, and shipped through the rule file | Consent each time; never send the real message; delete reports after the rule is fixed | 1 (Must) |
+| Salary-day plan | When a salary credit is detected (repeating credit, similar amount, same sender), the app shows how the last 3–6 salaries were split — bills and EMIs, sent home, spent, saved or invested — and proposes this month's plan from the user's own averages. The user adjusts it; the app tracks plan vs actual | Freelancers and irregular earners need a "money-in" version without a fixed payday | 2 |
+| "Good day to send money home" signal | Compares today's rate for the user's corridor with its 30-day and 90-day averages, e.g. "today is 0.8% better than the 30-day average". Optional alert when today beats both | Comparison only, never a forecast or advice; label "rates can move either way". Show the provider's fee too, since total cost matters more than the rate | 2 |
+| "Safe to spend" widget | Home-screen widget showing what is left to spend this month, and per day, in home currency (formula below) | Privacy setting to hide numbers and show only a colour (green / amber / red) on shared phones | 2 |
+| End-of-service gratuity and return-home readiness | Estimates UAE gratuity from basic salary and years of service (formula below). A readiness view adds gratuity, savings and investments in home currency and compares them with the cost of moving back: months of living costs at home plus planned goals (house, education). Shows months of runway and the gap | Estimate only. Other Gulf countries use different formulas, e.g. Saudi Arabia 15 days a year for the first five years ([Hyring summary](https://hyring.com/free-hr-toolkit/hr-glossary/gratuity-uae)), so this becomes an "end-of-service benefit" rule in each country pack | 3 |
+
+**Safe to spend:**
+
+```latex
+\text{Safe to spend} = \text{Money in this month} - \text{Bills and EMIs still due} - \text{Planned saving and remittance} - \text{Spent so far}
+```
+
+Per day = safe to spend ÷ days left in the month.
+
+**UAE gratuity estimate** (Federal Decree-Law No. 33 of 2021): 21 days of basic salary for each of the first five years and 30 days for each year after, with at least one year of service, based on the last basic salary and capped at two years' wages ([Gulf News](https://gulfnews.com/living-in-uae/ask-us/uae-gratuity-calculation-guide-2026-1.500532178), [Zoho](https://zstatic.zohostatic.com/en-ae/payroll/academy/compliance/uae-gratuity-by-tenure.html)).
+
+```latex
+\text{Gratuity} = \frac{\text{Basic}}{30} \times 21 \times \min(Y, 5) + \frac{\text{Basic}}{30} \times 30 \times \max(Y - 5, 0)
+```
+
+Y = years of service (partial years pro rata). Example: basic AED 6,000 and 7 years gives AED 21,000 + AED 12,000 = AED 33,000. Some employees are on alternative schemes instead (for example DIFC's DEWS), so the app should ask which applies.
+
 ## Roadmap
 
 Build the Android SMS tracker and calculator first (about 3 months); bank feeds and broker sync come only after partners and legal review are in place.
@@ -381,7 +522,7 @@ Each phase starts only when its gate is passed; if Google Play refuses SMS acces
 
 ## Competitors, business model and risks
 
-Indian expense trackers are INR-first and UAE apps are AED-first; the gap is a cross-border NRI view with remittance cost and investment "what if".
+Most expense trackers are built for one country and one currency; the gap is a cross-border view for people whose money lives in several countries, with remittance cost and investment "what if". The tables below cover launch-market apps first, then global ones.
 
 | App | Approach | Multi-currency / NRI | Gap this app fills |
 | --- | --- | --- | --- |
@@ -408,7 +549,7 @@ Indian expense trackers are INR-first and UAE apps are AED-first; the gap is a c
 
 - Freemium subscription: free tracker; paid tier for net worth, simulator, multi-device sync, family sharing (e.g. AED 15–25 a month).
 - Remittance comparison referral fees from licensed exchange houses — show all options ranked by total cost, not by commission.
-- B2B: white-label tracker for UAE exchange houses or banks that serve Indian customers.
+- B2B: white-label tracker for UAE exchange houses or banks that serve migrant and expat customers in any corridor.
 - Later: a SEBI-registered adviser partner offering paid advice inside the app, clearly separated.
 
 ### Pricing: one-month free trial, then a low price
@@ -451,7 +592,7 @@ Price by country (the stores support local prices), and push the yearly plan: it
 | Bank SMS formats change | Parsing breaks | AI parser for unknown formats + user correction loop |
 | Seen as unregistered advice | SEBI / UAE action | Scenarios only, legal review, registered partner for advice |
 | Data breach | Loss of trust, fines under DPDP/PDPL | On-device processing, encryption, store no raw SMS |
-| Low trust in a new finance app | Slow growth | Open privacy policy, offline mode, community in UAE Indian groups |
+| Low trust in a new finance app | Slow growth | Open privacy policy, offline mode, expat and migrant community groups, starting with Indians in the UAE |
 
 ## Sources
 
@@ -482,3 +623,20 @@ Return figures in Module 4 are illustrative assumptions, not sourced forecasts. 
 * [Finny — Lunch Money review 2026](https://getfinny.app/blog/lunch-money-review-2026)
 * [NomadMetrics app listing](https://mwm.ai/apps/nomadmetrics-expense-tracker/6767209647)
 * [Richify — net worth trackers compared](https://www.richify.ai/best/net-worth-trackers)
+
+- [Rudaw — IFAD report on 2025 remittances](https://rudaw.net/english/categories/world/1079300)
+- [Statista — countries that depend most on remittances (World Bank data)](https://www.statista.com/chart/amp/13659/the-countries-who-depend-on-remittances-the-most)
+
+* [Google Play — policy announcement, July 15, 2026](https://support.google.com/googleplay/android-developer/answer/17134731?hl=en)
+* [Google Play — SMS/Call Log policy preview, effective 27 Jan 2027](https://support.google.com/googleplay/android-developer/answer/17225965)
+* [DEV Community — finance app SMS permission rejection](https://dev.to/zeta_byte/ive-been-working-on-a-personal-finance-app-called-finvantage-and-i-recently-hit-a-roadblock-4mjh)
+* [Trustable — UAE PDPL status, October 2026](https://trytrustable.com/uae-pdpl)
+* [Skimbox — UAE PDPL compliance checklist 2026](https://www.skimbox.co/en/resources/blogs/pdpl-compliance-uae)
+* [Google — ML Kit GenAI APIs (Gemini Nano)](https://developers.google.com/ml-kit/genai)
+* [Appknox — OWASP MASVS v2.1](https://www.appknox.com/cyber-security-jargons/masvs)
+* [Remittance fee summary citing World Bank RPW Q1 2025](https://website-2u6.pages.dev/blog/hidden-fees)
+
+- [Google Play — Device and Network Abuse policy](https://support.google.com/googleplay/android-developer/answer/9888379?hl=en)
+- [Gulf News — UAE gratuity guide 2026](https://gulfnews.com/living-in-uae/ask-us/uae-gratuity-calculation-guide-2026-1.500532178)
+- [Zoho — UAE gratuity by tenure](https://zstatic.zohostatic.com/en-ae/payroll/academy/compliance/uae-gratuity-by-tenure.html)
+- [Hyring — gratuity rules across Gulf countries](https://hyring.com/free-hr-toolkit/hr-glossary/gratuity-uae)
