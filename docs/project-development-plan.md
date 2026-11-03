@@ -4,21 +4,25 @@ Nov 3, 2026 · Companion to [`project-research.md`](project-research.md)
 
 ## How to use this plan
 
-This plan takes the project from an unfinished research idea to a launched, maintained app. It runs in 9 stages, and each one ends with a **gate**: a short checklist that has to pass before the next stage starts. Gates stop you from writing code on top of requirements that aren't settled yet.
+This plan takes the project from an unfinished research idea to a launched, maintained app. It is sized for **one person building with AI**: validate first, keep the documents few, write real code early, and get a thin version into testers' hands fast. Each stage ends with a **gate**, a short checklist that has to pass before the next stage starts.
 
 | # | Stage | Main output | Tool | Rough time (solo + AI) |
 |---|---|---|---|---|
-| R | Research and idea validation | Validated business plan | You + Claude (this plan, sections R1–R3) | 2–4 weeks |
-| 0 | Business plan and tech stack | `plancasting/tech-stack.md` | Transmute `/tech-stack` | 2–3 days |
-| 1 | BRD | `plancasting/brd/` | Transmute `/brd` | 3–5 days |
-| 2 | Functional design (PRD/FDD) | `plancasting/prd/` | Transmute `/prd` then `/validate-specs` | 1 week |
-| 3 | Technical architecture (HLD/LLD) | `docs/architecture/` + ADRs | BMAD Architect, or Claude directly | 1 week |
-| 4 | UI/UX design | `docs/ux/` + clickable prototype | BMAD UX Designer + a design tool | 1–2 weeks |
-| 5 | Development | Working app, built feature by feature | Claude Code + Transmute `/scaffold`, `/implement` | 10–14 weeks (MVP) |
-| 6 | Testing and QA | Test reports, audit fixes | Transmute audits + mobile test stack | Runs alongside Stage 5, plus 2 weeks hardening |
-| 7 | Deployment and operations | Play Store release, monitoring | Play Console, CI/CD | 2–4 weeks staged rollout |
+| R | Research, idea validation + **technical spike** | Validated business plan; proof that capture works on real phones | You + Claude (sections R1–R4) | 3–4 weeks |
+| 0–2 | **Lean spec:** stack, BRD, functional spec, privacy/legal drafts, budget | `plancasting/` (tech stack, short BRD, PRD = the one living spec) | Transmute `/tech-stack`, `/brd`, `/prd`, `/validate-specs` | 1–2 weeks |
+| 3 | Technical architecture | One `docs/architecture.md` + short ADRs; second spike if needed | Claude | 3–5 days |
+| 4 | UI/UX design (overlaps Stage 3) | Wireframes, design tokens, clickable prototype | Claude + a design tool | 1 week |
+| 5 | Development in vertical slices | Thin end-to-end slice with closed testers by dev week 4–6, then grow | Claude Code + Transmute `/scaffold`, `/implement` | 10–14 weeks (MVP) |
+| 6 | Testing and QA | Test reports, audit fixes | Transmute audits + mobile test stack | Alongside Stage 5, plus 2 weeks hardening |
+| 7 | Deployment, operations, feedback loop | Play Store release, monitoring, monthly releases | Play Console, CI/CD, Transmute `/feedback` | 2–4 weeks staged rollout, then ongoing |
 
-You are at **Stage R**. The research now covers metrics, MVP scope, edge cases and global requirements; what's missing is evidence from real users and a few open decisions (section R1).
+**Rough timeline:** first real code in week 3 (the spike); spec done by week 6; development starts around week 7; first slice with closed testers around weeks 10–12; MVP launch around weeks 20–24.
+
+**One framework.** Transmute is the only spec framework. It has no architecture or design stage, so Claude writes those two documents directly. BMAD and Spec Kit aren't needed and would add a second set of file conventions.
+
+**Documents are kept few on purpose.** The BRD is generated once and frozen as the baseline. The **PRD is the single living spec**: when something changes, update the PRD (and an ADR if it's a big decision), nothing else.
+
+You are at **Stage R**. The research now covers metrics, MVP scope, edge cases and global requirements; what's missing is evidence from real users, a technical spike and a few open decisions (section R1).
 
 ---
 
@@ -73,17 +77,43 @@ Follow the research's *User research plan*. In practice:
 
 Avoid or delay: anything that names specific funds or stocks (regulated advice), lending or credit scoring (strict Google Play personal-loan rules), reading contacts.
 
-**Gate R → 0:** interviews done and written up; decision rule met; open decisions closed; SMS test set started (≥ 200 samples); legal questions have an owner and date.
+### R4. Technical spike (weeks 3–4, alongside interviews)
+
+Before writing specs, build the riskiest piece for real, as throwaway code. The question to answer: **can the app capture and read transactions reliably on the phones your users own?**
+
+- A minimal Android app (Flutter + Kotlin plugin) that listens to notifications (and reads SMS on a test build), runs a few parser rules, and shows a list.
+- Run it for a week on 3–4 real phones, including a budget Xiaomi or Samsung (these often stop background apps to save battery).
+- Measure: share of bank alerts captured, how many are cut short, parsing accuracy on your first samples, battery use.
+- Write the result as the first ADR. If capture is unreliable, the MVP leans harder on statement import, and the plan changes **now** rather than in month 3.
+
+### R5. Play Store and account decisions (start now, they take time)
+
+- **Closed testing rule.** New *personal* Google Play developer accounts (created after 13 Nov 2023) must run a closed test with at least **12 testers opted in for 14 continuous days** before each new app can go to production; internal testing doesn't count ([Google Play help](https://support.google.com/googleplay/android-developer/answer/14151465?hl=en-GB), [summary](https://www.testerscommunity.com/blog/google-play-closed-testing-requirements-2026)). **Recruit 20–25 testers from the waitlist during Stage R** so it can't block the launch.
+- **Personal or organization account.** Google requires an organization account for apps offering financial products and services such as banking, loans, stock trading or investment funds ([Google Play policy](https://support.google.com/googleplay/android-developer/answer/10788890?hl=en)). A tracker and simulator probably falls outside that, but broker links or investment features could pull it in. An organization account needs a registered company and a D-U-N-S number, and it's exempt from the 12-tester rule. Decide before registering, since account type is hard to change later.
+- **Financial features declaration.** Every app must complete it in Play Console, even one with no financial features.
+
+**Gate R → 0:** interviews done and written up; decision rule met; spike result recorded as an ADR; open decisions closed; developer account type chosen; 20+ testers recruited; SMS test set started (≥ 200 samples); legal questions have an owner and date.
 
 ---
 
-## Stage 0: Business plan and tech stack
+## Stages 0–2: Lean spec (1–2 weeks)
 
-**Input:** the research doc plus the validation results from Stage R.
-**Output:** `plancasting/businessplan/` (the business plan) and `plancasting/tech-stack.md`.
+**Input:** the research doc, validation results and the spike ADR.
+**Output:** `plancasting/tech-stack.md`, a short BRD (`plancasting/brd/`), the PRD (`plancasting/prd/`), privacy/legal drafts and a budget.
 
-1. Turn the research into a business plan: copy `docs/project-research.md` plus the validation results into `plancasting/businessplan/` (Transmute reads `.md` or `.pdf` files from there).
-2. Run `/tech-stack`. It will ask questions; the recommended answers are below.
+Run the Transmute stages back to back, without polishing each document separately:
+
+1. Copy `docs/project-research.md`, the validation results and the spike ADR into `plancasting/businessplan/` (Transmute reads `.md` or `.pdf` from there).
+2. `/tech-stack`: answer with the recommended stack below.
+3. `/brd`: check it has goals and KPIs, the seven personas, MVP scope, business rules (edge cases, duplicates, currency, remittance cost, gratuity and safe-to-spend formulas, simulator rules and disclaimers), country rules as data (G26), regulation (SEBI advice line, DPDP, PDPL, GDPR baseline, Play policy) and NFRs (G9–G11, G21–G22). Transmute marks guesses as `ASSUMPTION`; get the assumption volume **below 30%**. Then freeze the BRD as the baseline.
+4. `/prd` then `/validate-specs`. The PRD must define:
+   - **Screens:** onboarding + consent, permissions explainer, home dashboard, transactions list, transaction detail/edit, accounts, import (paste/file), duplicate review, categories, insights, what-if simulator, settings, privacy centre (export/delete), paywall.
+   - **User flows:** first-run (install → consent → grant notification or SMS access → history import → first summary); daily capture; correcting a parse; reviewing a possible duplicate; running a simulation from an insight; trial end.
+   - **Acceptance criteria** in Given/When/Then form. Example: *Given* "Purchase of AED 85.50 with Card ending 1234 at CARREFOUR", *when* it arrives, *then* a debit of 85.50 AED on card ••1234, merchant Carrefour, category Groceries is created within 2 seconds, and *no* duplicate is created when the matching statement line is imported later.
+   - **Data model** and **parser contract:** input (sender, body, timestamp) → output (fields + confidence + rule ID).
+   - **Analytics events** for each KPI in the research (activation, auto-capture rate, retention, trial-to-paid), with no personal data in any event.
+5. **Privacy and legal drafts (now, not at the end):** privacy policy, Play Data safety form answers, consent screen texts, the SMS permission declaration text, the financial features declaration, and the "scenarios, not advice" wording for the lawyer's review.
+6. **Budget** (see the Budget section): confirm what the MVP year will cost.
 
 ### Recommended stack
 
@@ -97,81 +127,49 @@ Avoid or delay: anything that names specific funds or stocks (regulated advice),
 | Backend (thin) | Serverless functions (e.g. Cloudflare Workers or Supabase Edge) for: FX rates, rule pack hosting, billing webhooks, masked parse reports | Local-first app; avoid running servers in the MVP |
 | Sync (phase 2) | Supabase (Postgres) with end-to-end encrypted payloads, or skip sync until asked | Keep the MVP server-light |
 | Billing | Google Play Billing (via RevenueCat or the official plugin) | Trials, regional prices, entitlements |
-| Crash/analytics | Sentry or Firebase Crashlytics with PII scrubbing; privacy-first analytics | No amounts, merchants or SMS ever leave the phone |
+| Crash/analytics | Sentry or Firebase Crashlytics with PII scrubbing; privacy-first analytics | From the first build; no amounts, merchants or SMS ever leave the phone |
 | CI/CD | GitHub Actions + Fastlane (or Codemagic) | Builds, tests, signed releases to Play tracks |
 
-**Gate 0 → 1:** tech stack confirmed; hosting region chosen (UAE or India); budget for paid services noted.
+**Gate 0–2 → 3:** stack confirmed; BRD assumption volume < 30% and frozen; `/validate-specs` shows no uncovered requirements or contradictions; every MVP screen has acceptance criteria; privacy and legal drafts written; budget agreed.
 
 ---
 
-## Stage 1: Business Requirements Document (BRD)
+## Stage 3: Technical architecture (3–5 days)
 
-Run `/brd`. It reads the business plan and tech stack and writes `plancasting/brd/`.
+Claude writes **one** document, `docs/architecture.md`, from the PRD, plus short ADRs. No separate HLD/LLD files.
 
-**Check that the BRD contains:** business goals and KPIs; all seven personas; scope in/out (the research's MVP boundary); business rules (edge-case rules, duplicate rules, currency rules, remittance cost, gratuity and safe-to-spend formulas, simulator rules and disclaimers); country rules as versioned data (G26); regulatory requirements (SEBI advice line, DPDP, PDPL, GDPR baseline, Play policy); NFRs (G9–G11, G21–G22); risks and assumptions.
-
-Transmute marks guesses as `ASSUMPTION` and computes an assumption volume. **Get it below 30%** by answering the open questions; above that it flags the BRD as critical.
-
-**Gate 1 → 2:** assumption volume < 30%; every requirement has an ID (BR-, FR-, NFR-); legal questions have an owner and a date.
-
----
-
-## Stage 2: Functional Design (PRD / FDD)
-
-Run `/prd`, then `/validate-specs`.
-
-**What the functional design must define for this app:**
-
-- **Screens:** onboarding + consent, permissions explainer, home dashboard, transactions list, transaction detail/edit, accounts, import (paste/file), duplicate review, categories, insights, what-if simulator, goals, settings, privacy centre (export/delete), paywall.
-- **User flows:** first-run (install → consent → grant SMS or notification access → history import → first summary); daily capture; correcting a parse; reviewing a possible duplicate; running a simulation from an insight; trial end.
-- **Acceptance criteria** in Given/When/Then form for each feature. Example:
-  *Given* an SMS "Purchase of AED 85.50 with Card ending 1234 at CARREFOUR", *when* it arrives, *then* a debit of 85.50 AED on card ••1234, merchant Carrefour, category Groceries is created within 2 seconds, and *no* duplicate is created when the matching bank statement line is later imported.
-- **Data model:** accounts, transactions (original amount, currency, rate, rate source, home amount), sources, merchants, categories, rules, FX rates, holdings, goals, consents.
-- **Parser contract:** input (sender, body, timestamp) → output (fields + confidence + rule ID).
-
-**Gate 2 → 3:** `/validate-specs` shows no uncovered BRD requirements and no contradictions; every MVP screen has acceptance criteria.
-
----
-
-## Stage 3: Technical Architecture (HLD / LLD)
-
-Transmute has no dedicated architecture stage, so write these documents before scaffolding. Use BMAD's Architect agent, or ask Claude to write them from the PRD.
-
-**HLD (`docs/architecture/hld.md`):**
-- Component diagram: capture sources (SMS, notifications, paste, file) → normalizer → parser (rules → on-device AI → cloud AI) → dedup/transfer matcher → encrypted store → analytics/simulator → UI. Thin cloud: rates, rule packs, billing, masked reports.
+**`docs/architecture.md` covers:**
+- Component diagram: capture sources (notifications, SMS, paste, file) → normalizer → parser (rules → optional on-device AI → masked cloud AI) → dedup/transfer matcher → encrypted store → analytics/simulator → UI. Thin cloud: rates, rule packs, billing, masked reports.
 - Data flow and trust boundaries: what never leaves the phone (raw SMS, amounts unless sync is on).
-- Deployment view: app, edge functions, storage, CI/CD.
-- Threat model (STRIDE) and mapping to OWASP MASVS controls.
+- Database schema and migration approach.
+- Rule-pack format (JSON schema, version, signature, built-in test samples, rollback).
+- Duplicate score algorithm with the research's weights, and thresholds for auto-merge vs asking the user.
+- FX service (sources, caching, offline fallback) and background work (WorkManager, battery limits).
+- App folder structure (feature-first) and logging rules (no personal data).
+- Threat model (STRIDE) mapped to OWASP MASVS controls.
 
-**LLD (`docs/architecture/lld/`):**
-- Database schema and migrations.
-- Parser rule-pack format (JSON schema, version, signature), and rule matching order.
-- Duplicate score algorithm with the weights from the research, and thresholds for auto-merge vs ask the user.
-- FX service: sources, caching, fallback when offline.
-- Background work: Android WorkManager jobs, battery limits.
-- Module/package structure for the Flutter app (feature-first folders).
-- Error handling and logging rules (no personal data in logs).
+**ADRs (`docs/adr/`)**, one short file per big decision: spike result; Flutter vs KMP; local-first; SQLCipher; rule pack as data; parser AI order; billing provider; developer account type.
 
-**Architecture Decision Records (`docs/adr/`)** — one short file per big choice: Flutter vs KMP; local-first; SQLCipher; rule pack as data; on-device AI first; billing provider.
+**Second spike (1–2 days, only if needed):** anything the first spike didn't cover and the design depends on, e.g. SQLCipher speed on a 2 GB phone or rule-pack signing.
 
-**Gate 3 → 4:** HLD and LLD reviewed; every NFR has an architectural answer; threat model done.
+**Gate 3 → 4:** architecture reviewed; every NFR has an answer; threat model done.
 
 ---
 
-## Stage 4: UI/UX Design
+## Stage 4: UI/UX design (1 week, overlaps Stage 3)
 
 1. **Information architecture:** bottom navigation of 4–5 tabs (Home, Transactions, Insights, Plan, Settings).
 2. **Wireframes** for every PRD screen, low fidelity first.
-3. **Design system:** colours as tokens, type scale, spacing, components (cards, amount chips with currency, charts). Plan for dark mode, RTL (Arabic) and large text from the start.
+3. **Design system:** colours as tokens, type scale, spacing, motion (durations, easing, when to animate), components (cards, amount chips with currency, charts). Plan for dark mode, RTL (Arabic), large text and "reduce motion" from the start.
 4. **Key UX rules for this app:**
    - Always show the original currency next to the converted amount.
    - Use an "Illustrative" label and a range (low/mid/high) on every projection.
    - Explain each permission on a screen of its own *before* the system prompt.
-   - Show at least one useful insight within 5 minutes of install.
+   - Show at least one useful insight within 10 minutes of install (the research's activation target).
    - Make correcting a wrong parse take 1 tap.
-5. **Clickable prototype** (Figma or similar) and **5 usability tests** with target users before coding.
+5. **Clickable prototype** (Figma or similar) and **5 usability tests** with target users, ideally people from the tester list.
 
-Tools: BMAD's UX Designer agent for flows and specs; a design tool for visuals. Transmute's `/redesign` and `/polish` come later, on the built app.
+Tools: Claude for flows, screen specs and design tokens; a design tool for visuals. Transmute's `/redesign` and `/polish` come later, on the built app.
 
 **Gate 4 → 5:** prototype tested with 5 users; top usability issues fixed; design tokens exported.
 
@@ -179,20 +177,21 @@ Tools: BMAD's UX Designer agent for flows and specs; a design tool for visuals. 
 
 ## Stage 5: Development (AI-assisted)
 
-### 5.1 Build order
+### 5.1 Build order: vertical slices
 
-Build the riskiest, most valuable parts first.
+Get a **thin end-to-end slice** working first, put it in closed testers' hands, then widen it. Each slice runs from capture all the way to the screen.
 
-| Sprint (2 weeks) | Deliverable |
-|---|---|
-| 1 | Project scaffold (`/scaffold`), CI, encrypted DB, design tokens, app lock |
-| 2 | Parser engine + rule pack for the first banks; accuracy test running in CI |
-| 3 | SMS reader and notification listener (Kotlin plugin), paste import, history import |
-| 4 | Accounts, multi-currency, FX rates offline, transaction list and edit |
-| 5 | Duplicate check, transfer matching, categories with learning |
-| 6 | Dashboard, insights (subscriptions, delivery, fees, remittance cost) |
-| 7 | What-if simulator, privacy centre (export/delete), paywall + Play Billing |
-| 8 | Hardening, audits (Stage 6), closed beta |
+| Sprint (2 weeks) | Slice | Delivered to |
+|---|---|---|
+| 1 | Scaffold (`/scaffold`), CI, encrypted DB, crash reporting and analytics events, app lock. **Slice 1:** notification capture → rule parser for the first 5 banks → transaction list → this month's total in home currency | Internal testing |
+| 2 | Rule pack + accuracy test in CI; paste import; categories with corrections; "report wrong parse" | Internal testing |
+| 3 | Accounts, multi-currency, FX rates offline; monthly dashboard. **Open the closed test track** (the 14-day clock starts) | **Closed testers (dev weeks 5–6)** |
+| 4 | Duplicate check and transfer matching; statement import; remittance cost | Closed testers |
+| 5 | Insights (subscriptions, delivery, fees); what-if simulator (SIP/EMI) | Closed testers |
+| 6 | Privacy centre (export/delete), consent log, paywall + Play Billing, SMS reading if approved | Closed testers |
+| 7 | Hardening, audits (Stage 6), fixes from tester feedback | Closed testers → production review |
+
+Review analytics and tester feedback at the end of every sprint, and update the PRD before starting the next one.
 
 ### 5.2 The AI-assisted ("vibe coding") workflow
 
@@ -205,12 +204,11 @@ Build the riskiest, most valuable parts first.
 | Main coding agent | **Claude Code** (terminal, desktop, or cloud sessions like this one) | Plans, edits many files, runs tests, commits |
 | Editor | Android Studio (Flutter plugin) or VS Code / Cursor | For reading code, debugging, emulators |
 | Spec framework | **Transmute** (installed) for BRD → PRD → scaffold → implement → audits | Already in `.claude/skills/` |
-| Architecture + UX | **BMAD Method** Architect and UX Designer agents ([BMAD guide](https://developertoolkit.ai/en/ecosystem/frameworks/bmad-method/)) | Fills Transmute's Stage 3–4 gap |
-| Per-feature specs | **GitHub Spec Kit** (`/specify` → `/plan` → `/tasks`) is an option for new features after launch ([Spec Kit guide](https://codemyspec.com/blog/github-spec-kit-guide)) | GitHub calls it an experiment; Transmute's `/feedback` covers similar ground |
+| Architecture + UX docs | Claude, directly from the PRD | Transmute has no stage for these; one document each |
 | Code review | Claude Code `/code-review` and `/security-review` on every PR | A second pass catches what the writing pass missed |
 | CI | GitHub Actions | Runs lint, tests, parser accuracy, build on every push |
 
-Pick **one** spec framework per stage to avoid conflicting file layouts: Transmute for 0–2 and 5–7, BMAD only for 3–4.
+Use **one** spec framework (Transmute) so there is only one set of file conventions.
 
 **Project files that steer the AI** (create in Stage 5, sprint 1):
 
@@ -314,13 +312,34 @@ A feature is done only when:
 ## Stage 7: Deployment and operations
 
 1. **Play Console setup:** app listing, Data safety form (must match what the app really does), SMS permission declaration form with a demo video, content rating, privacy policy URL.
-2. **Release tracks:** internal → closed testing (beta) → production with **staged rollout** (5% → 20% → 50% → 100%), pausing if the crash rate rises.
+2. **Release tracks:** internal → closed testing (from Stage 5 sprint 3; on a personal account, at least 12 testers opted in for 14 continuous days before production access) → production with **staged rollout** (5% → 20% → 50% → 100%), pausing if the crash rate rises.
 3. **CI/CD:** tag → GitHub Actions builds and signs → uploads to the Play internal track. Keep signing keys in Play App Signing and CI secrets, never in the repo.
 4. **Monitoring:** crash-free rate, ANRs, parse-failure rate per bank (from masked reports), billing errors, FX rate job health.
 5. **Operations runbook (`docs/ops/`):** what to do when a bank changes its SMS format (ship a rule pack update), when FX rates fail (use cache, show "rate as of"), when Play rejects a release, and when there's a data incident (DPDP/PDPL breach reporting).
-6. **After launch:** Transmute `/feedback` to turn feedback into spec updates and `/maintain` for monthly dependency updates; release monthly.
+6. **Feedback loop:** every month, collect in-app feedback, "report wrong parse" data, store reviews and KPI analytics → run Transmute `/feedback` to turn them into PRD updates → re-prioritise the backlog → ship. Compare KPIs with the research's targets each month and revisit the business plan every quarter.
+7. **Maintenance:** `/maintain` for monthly dependency and security updates.
 
 ---
+
+## Budget (first year, rough)
+
+Confirm current prices before committing; most services have free tiers that cover an MVP.
+
+| Item | Cost | Notes |
+|---|---|---|
+| Google Play developer account | USD 25, one-time | Organization account also needs a company and a D-U-N-S number |
+| Apple developer account | USD 99/year | Only when the iOS app starts (not MVP) |
+| AI coding tools | Your Claude plan, plus any editor subscription | The largest fixed cost for a solo builder |
+| Serverless backend + rule-pack hosting | Free tier at MVP scale | Cloudflare Workers or Supabase |
+| Cloud AI for unknown SMS formats | Capped per user (research: per-user cost cap) | Set a monthly ceiling and alerts |
+| FX rates API | Free tier, or low monthly fee | Cache on the phone |
+| Crash reporting, analytics, billing tools | Free tiers at start | Sentry/Crashlytics, RevenueCat |
+| Domain, landing page, email | Low yearly cost | Needed in Stage R |
+| Legal review (India + UAE) | Get quotes | "Scenarios, not advice" wording, privacy policy, terms |
+| External security test (OWASP MASVS) | Get quotes | Required by the Stage 6 gate |
+| Test phones (budget Xiaomi/Samsung) | One-off | Needed for the spike and device testing |
+
+Add the total to the business plan, and compare it with the research's revenue model to see how many paying users cover costs.
 
 ## Folder layout
 
@@ -328,15 +347,15 @@ A feature is done only when:
 docs/
   project-research.md          research (Stage R)
   project-development-plan.md  this plan
-  research/interviews/         interview notes (R3)
-  architecture/  hld.md, lld/  (Stage 3)
+  research/interviews/         interview notes (R2)
+  architecture.md              architecture (Stage 3)
   adr/                         decision records
   ux/                          wireframes, flows, design tokens (Stage 4)
   ops/                         runbooks (Stage 7)
 plancasting/                   Transmute's working folder
-  businessplan/                Stage 0 input
-  tech-stack.md                Stage 0 output
-  brd/  prd/                   Stages 1–2
+  businessplan/                lean spec input
+  tech-stack.md, brd/          lean spec (BRD frozen as baseline)
+  prd/                         the one living spec
 CLAUDE.md                      AI working rules (Stage 5)
 ```
 
@@ -344,7 +363,9 @@ CLAUDE.md                      AI working rules (Stage 5)
 
 - [ ] Write the interview script and book the first 5 interviews across the 3 corridors (R2).
 - [ ] Start collecting masked SMS samples, aiming for 200 by the end of Stage R.
-- [ ] Put up the landing page and waitlist.
+- [ ] Put up the landing page and waitlist; recruit 20–25 closed testers from it.
+- [ ] Decide personal vs organization Play developer account (R5).
+- [ ] Plan the technical spike for weeks 3–4 (R4).
 - [ ] Close the research's open decisions and record each as an ADR.
 - [ ] Track the UAE PDPL regulations and Google Play SMS policy (G19, G20).
 - [ ] When the Stage R gate passes: copy the research into `plancasting/businessplan/` and run `/tech-stack`.
@@ -353,8 +374,9 @@ CLAUDE.md                      AI working rules (Stage 5)
 
 - [Google Play — SMS and Call Log policy preview (July 2026)](https://support.google.com/googleplay/android-developer/answer/17225965)
 - [Simmons & Simmons — UAE PDPL FAQs](https://www.simmons-simmons.com/en/publications/ckwugz8lu16rs0a44qvbqcbz9/uae-personal-data-protection-law-faqs)
-- [Developer Toolkit — BMAD Method: agile roles as agents](https://developertoolkit.ai/en/ecosystem/frameworks/bmad-method/)
-- [CodeMySpec — GitHub Spec Kit guide (2026)](https://codemyspec.com/blog/github-spec-kit-guide)
+- [Google Play — app testing requirements for new personal accounts](https://support.google.com/googleplay/android-developer/answer/14151465?hl=en-GB)
+- [Testers Community — Google Play closed testing requirements 2026](https://www.testerscommunity.com/blog/google-play-closed-testing-requirements-2026)
+- [Google Play — organization account requirement and financial features declaration](https://support.google.com/googleplay/android-developer/answer/10788890?hl=en)
 - [Flutter vs Kotlin Multiplatform in 2026 (FlutterFever)](https://flutterfever.com/news/flutter-vs-kotlin-multiplatform/)
 - [AI coding workflow best practices: CLAUDE.md, AGENTS.md, subagents (2026)](https://www.youngju.dev/blog/culture/2026-05-14-ai-coding-workflow-best-practices-2026-claude-md-agents-md-cursorrules-subagent-skill-design-deep-dive.en)
 - Other facts (regulation, market size, pricing) are sourced in `project-research.md`.
