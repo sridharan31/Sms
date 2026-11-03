@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "skills": {
+    "audit-a11y": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/audit-a11y/SKILL.md",
+      "computedHash": "d3e7cae6ef9c40417c1d1be86b9618e4799b7995918389215e1661a5d5d15b9c",
+      "installMode": "copy"
+    },
+    "audit-completeness": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/audit-completeness/SKILL.md",
+      "computedHash": "50f0adb02280e25b66c1d5228605aa2fe74385e19e20eb09344d9f65cd562fd7",
+      "installMode": "copy"
+    },
+    "audit-security": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/audit-security/SKILL.md",
+      "computedHash": "a99188125dc629191589223323e558cadf5f2227d41cd338aa15922655437a53",
+      "installMode": "copy"
+    },
+    "brd": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/brd/SKILL.md",
+      "computedHash": "58be364e3fecce44abaacfb87d368b0068c96e2db65f6f7a4e01d99625ff2a79",
+      "installMode": "copy"
+    },
+    "docs": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/docs/SKILL.md",
+      "computedHash": "780fade9925048486afdaa9d4c2c14f7766276dbf37905e518bd0503128fd59b",
+      "installMode": "copy"
+    },
+    "feedback": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/feedback/SKILL.md",
+      "computedHash": "1c1f0d60278168f6e7537234ae3eb82a35f939ea326ed08e9840c6a78127c9bd",
+      "installMode": "copy"
+    },
+    "harden": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/harden/SKILL.md",
+      "computedHash": "c143c20980817ba9d75fa64ec26362d54e9b37337127d240ee177136d06fb686",
+      "installMode": "copy"
+    },
+    "implement": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/implement/SKILL.md",
+      "computedHash": "6c05891dad99c71ae955ca14a6b933276f342d58c9b21a74f573316e6736f8a1",
+      "installMode": "copy"
+    },
+    "maintain": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/maintain/SKILL.md",
+      "computedHash": "615b616b9c70fa77d8e717b97428ff69dcbd4255be0c2ed511d66403cc79d207",
+      "installMode": "copy"
+    },
+    "optimize": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/optimize/SKILL.md",
+      "computedHash": "e325077184e79b150cd000583774434bcaf55a9d90b9f8262ae0df784f8d1154",
+      "installMode": "copy"
+    },
+    "polish": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/polish/SKILL.md",
+      "computedHash": "039165451bb1dc61c5cf271071b9dc45b700e7c00470c667a91d0dab971e832d",
+      "installMode": "copy"
+    },
+    "prd": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/prd/SKILL.md",
+      "computedHash": "3927a3993b79bf59a9948af6f6872c6e1115f43f2755fa1d9da2115cc93517d8",
+      "installMode": "copy"
+    },
+    "prelaunch": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/prelaunch/SKILL.md",
+      "computedHash": "a89c1e13a34c4b0c26675dcecf0fc473abc5deeae027c40632f657510085f798",
+      "installMode": "copy"
+    },
+    "redesign": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/redesign/SKILL.md",
+      "computedHash": "0c46d0b30dba82a843916d4046942523ca1252dae2f778183fbde948b447888c",
+      "installMode": "copy"
+    },
+    "refactor": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/refactor/SKILL.md",
+      "computedHash": "96bcad569cc78cb312d131fd716a5b34610b4e895ee9ce97166e3e3ce684b225",
+      "installMode": "copy"
+    },
+    "remediate": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/remediate/SKILL.md",
+      "computedHash": "ab34713566374ed934de5601da37f1efcf06e2efd91e5df08a274850101a1f17",
+      "installMode": "copy"
+    },
+    "scaffold": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/scaffold/SKILL.md",
+      "computedHash": "e0e4a1333f3a43d16db0691b0575bb17ee42c516ac8d0c8a27709f6778d80f60",
+      "installMode": "copy"
+    },
+    "seed-data": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/seed-data/SKILL.md",
+      "computedHash": "99d7c3debc66d364cceeaa04ff712d6c39cd0ca95c0794b272a1475a4e86506c",
+      "installMode": "copy"
+    },
+    "smoke": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/smoke/SKILL.md",
+      "computedHash": "6eb52988eeef73d8b823e7e9fa0ec81b84e6279c7fcff2750fa4a3bad820d4f7",
+      "installMode": "copy"
+    },
+    "tech-stack": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/tech-stack/SKILL.md",
+      "computedHash": "53b9844b6a1cf464d138e3da84f7603b3a6e88274260c05ec84e8b1550ef7b4a",
+      "installMode": "copy"
+    },
+    "user-guide": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/user-guide/SKILL.md",
+      "computedHash": "46c3df88f7c66162b25ea539554f14d8e2776df5a87752d4cef29c1972fe4b25",
+      "installMode": "copy"
+    },
+    "validate-specs": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/validate-specs/SKILL.md",
+      "computedHash": "da1d5d9f45e917c4ff934a845a8162f403c8221ccfe14241c11cdcf7c05c0170",
+      "installMode": "copy"
+    },
+    "verify": {
+      "source": "VoxTechnologies/transmute-framework",
+      "sourceType": "github",
+      "skillPath": "skills/verify/SKILL.md",
+      "computedHash": "3931f4da87ee3203b49cce5f3a90b892cd2f11b07832ffc55223589fb46cfdd9",
+      "installMode": "copy"
+    }
+  }
+}
