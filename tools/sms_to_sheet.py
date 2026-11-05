@@ -119,9 +119,12 @@ def is_phone_number(sender):
 
 def identify_provider(sender, body):
     core = sender_core(sender)
-    for key in sorted(PROVIDERS, key=len, reverse=True):
-        if core == key or core.startswith(key):
-            return PROVIDERS[key]
+    # older Indian IDs have the 2-letter operator prefix without a hyphen, e.g. "MDHdfcBk"
+    candidates = [core] + ([core[2:]] if len(core) >= 7 and core[:2].isalpha() else [])
+    for c in candidates:
+        for key in sorted(PROVIDERS, key=len, reverse=True):
+            if c == key or c.startswith(key):
+                return PROVIDERS[key]
     for pattern, key in BODY_NAMES:
         if re.search(pattern, body, re.I):
             return PROVIDERS[key]
@@ -143,7 +146,7 @@ CUR_MAP = {"aed": "AED", "dh": "AED", "dhs": "AED", "inr": "INR", "rs": "INR", "
            "usd": "USD", "us$": "USD", "$": "USD", "eur": "EUR", "€": "EUR",
            "gbp": "GBP", "£": "GBP", "sar": "SAR", "sr": "SAR"}
 BALANCE_CONTEXT = re.compile(
-    r"(bal(ance)?|avl|avail(able)?|limit|outstanding|total\s+due|min(imum)?\s+(amount\s+)?due|"
+    r"(bal(ance)?|avl|avail(able)?|limit|outstanding|o/s|total\s+due|min(imum)?\s+(amount\s+)?due|"
     r"amount\s+due|amt\s+due|due\s+amount)[\s:.\-a-z]{0,20}$",
     re.I,
 )
@@ -179,6 +182,9 @@ PROMO_RE = re.compile(
     r"\bwin\b|eligible\s+for|T&C|download\s+(the\s+)?app|upgrade\s+now|avail\s+now|instant\s+loan",
     re.I,
 )
+# Adverts that mention "credited" etc. but are never real transactions
+HARD_PROMO_RE = re.compile(r"eligib|T\s?&?\s?C\s+apply|insta(nt)?\s+(jumbo\s+)?loan|jumbo\s+loan|apply\s+now|"
+                           r"pre-?approved|plan\s+your|shop\s+now\s*$", re.I)
 DONE_VERB_RE = re.compile(
     r"debited|credited|spent|purchase|withdrawn|received|sent|transferred|paid|refund|revers|"
     r"declin|failed|deducted|charged|deposited|cashback|mandate|autopay|pre-?auth|hold|blocked|"
@@ -269,6 +275,14 @@ def mask_text(text):
     # greetings and names after transfer words
     t = re.sub(r"\b(Dear|Hi|Hello)\s+(?!(Customer|Cardholder|Member|Sir|Madam|Valued|User|Client)\b)"
                r"[A-Za-z][A-Za-z.]*(\s+[A-Z][A-Za-z.]*){0,2}", r"\1 [NAME]", t)
+    # free-text remarks and employer names
+    t = re.sub(r"(-TPT-).*?(?=\s+Val\b|$)", r"\1[NOTE]", t)
+    t = re.sub(r"(@[A-Za-z]{2,15}(?:-[A-Z]+)?-\d+-)[^.]*?(?=\s+Val\b|\.\s|$)", r"\1[NOTE]", t)
+    t = re.sub(r"(towards\s+SALARY\s+|salary\s+(?:from|by)\s+).*?(?=\s+Val(?:ue)?\b|\.\s|$)", r"\1[EMPLOYER]", t, flags=re.I)
+    t = re.sub(r"^(?:[A-Z][a-z]+\s+){1,3}(?=has\s+sent\b)", "[NAME] ", t)
+    t = re.sub(r"(\b(?:paid|sent)\s+(?:rs\.?|inr|aed)?\s?[\d,.]+\s+to\s+|has been paid to\s+|\bsent you\s+)"
+               r"(?!(your|a/c|the|VPA|\[|XX|account)\b)[A-Za-z][\w .&'-]*?(?=\s+(?:at|on|by|via|bank|for)\b|[.,;]|$)",
+               r"\1[NAME]", t, flags=re.I)
     t = re.sub(r"\b(?:UPI|IMPS|NEFT|RTGS|MMT)(?:/[A-Za-z0-9.&@\-]+(?: [A-Z][A-Z.&]+){0,3})+", _mask_upi_chain, t)
     t = re.sub(
         r"(?P<lead>\b(?:transferred to|transfer to|trf to|sent to|paid to|received from|credited by|"
@@ -318,10 +332,12 @@ RULES = [  # (type, pattern) checked in order
     ("Card hold", r"pre-?auth|preauthori[sz]|on hold|amount (is )?held|hold of|\bblocked\b"),
     ("Partial refund", r"partial(ly)? refund"),
     ("Refund / reversal", r"refund|revers|chargeback|credited back"),
-    ("Cashback / reward", r"cash ?back|reward"),
+    ("Wallet top-up", r"added\s+rs\.?\s?[\d,.]+\s+to\s+your\s+\w*\s*wallet|top[- ]?up|wallet (load|recharge)"),
+    ("Cashback / reward", r"(received|credited|earned).{0,30}cash ?back|cash ?back[^.]{0,30}(credited|received)|reward points? (credited|earned)"),
     ("Salary", r"\bsalary\b|\bsal\b|payroll|\bWPS\b"),
     ("Card bill payment", r"payment.{0,40}(received|credited).{0,60}card|card (bill|payment)|"
                           r"thank you for (your )?payment|credit card payment|\bCC payment|towards your card"),
+    ("Card purchase", r"\bPOS\b"),
     ("ATM withdrawal", r"\bATM\b|cash withdraw|withdrawn|withdrawal"),
     ("EMI / loan", r"\bEMI\b|\bloan\b|instal+ment|\bNACH\b"),
     ("Wallet top-up", r"top[- ]?up|added to (your )?wallet|wallet (load|recharge)"),
@@ -331,7 +347,9 @@ RULES = [  # (type, pattern) checked in order
     ("Card purchase", r"purchase|\bspent\b|\bPOS\b|used (at|for)|card[^.]{0,60}\bat\b|\bat\b[^.]{0,40}card|txn[^.]{0,30}\bat\b"),
 ]
 REMIT_RE = re.compile(r"remit|inward|international transfer|telegraphic|\bTT\b|money transfer|"
-                      r"western union|transfer to india|beneficiary", re.I)
+                      r"western union|transfer to india", re.I)
+OUTGOING_RE = re.compile(r"request received to send|credited to the beneficiary|successfully sent|has been paid to", re.I)
+INCOMING_RE = re.compile(r"has sent (rs\.?|inr)?\s?[\d,.]+ to your", re.I)
 INWARD_RE = re.compile(r"inward|received from abroad|foreign inward|remittance received", re.I)
 
 
@@ -339,6 +357,10 @@ def classify(body, provider_name):
     """Return (txn_type, direction)."""
     is_debit = bool(DEBIT_RE.search(body))
     is_credit = bool(CREDIT_RE.search(body))
+    if OUTGOING_RE.search(body):
+        is_debit, is_credit = True, False
+    elif INCOMING_RE.search(body):
+        is_debit, is_credit = False, True
     if INFO_ONLY_RE.search(body) and re.search(r"regist|creat|set ?up|activat|success|approved", body, re.I) \
             and not re.search(r"debited|deducted", body, re.I):
         return "Autopay / mandate set-up", NONE
@@ -386,7 +408,7 @@ def merchant_of(masked, txn_type):
     m = re.search(r"\b(?:at|@)\s+(?P<m>[A-Za-z0-9*&.'\- ]{2,40}?)(?=\s+(?:on|dated|via|using|for|txn|with|ref|in|"
                   r"Avl|Avail|Bal|\d)\b|[.,;]|$)", masked)
     if not m and txn_type in ("Refund / reversal", "Partial refund", "Cashback / reward"):
-        m = re.search(r"\bfrom\s+(?P<m>[A-Za-z0-9*&.'\- ]{2,40}?)(?=\s+(?:has|have|is|was|on|for|to|of|ref)\b|[.,;]|$)", masked)
+        m = re.search(r"\bfrom\s+(?P<m>[A-Za-z0-9*&.'\- ]{2,40}?)(?=\s+(?:has|have|is|was|on|for|to|of|ref|into|in)\b|[.,;]|$)", masked)
     if m and not m.group("m").strip().startswith("["):
         name = re.sub(r"\s+", " ", m.group("m")).strip(" .-*")
         for _ in range(2):
@@ -487,6 +509,9 @@ def process(messages, name, consent, source, today, per_bank_type, keep_unknown)
         if OTP_RE.search(body):
             dropped["OTP / code"] += 1
             continue
+        if HARD_PROMO_RE.search(body) and not re.search(r"\b(added|paid|sent|withdrawn|spent)\b", body, re.I):
+            dropped["Promotion"] += 1
+            continue
         if PROMO_RE.search(body) and not re.search(r"debited|credited|spent|withdrawn|refund|revers|declin", body, re.I):
             dropped["Promotion"] += 1
             continue
@@ -509,8 +534,11 @@ def process(messages, name, consent, source, today, per_bank_type, keep_unknown)
         if not country:
             country = {"AED": "UAE", "INR": "India"}.get(currency, "Other")
         masked = mask_text(body)
+        if txn_type == "ATM withdrawal":      # ATM and branch locations can show where someone lives
+            masked = re.sub(r"(\bat\s+)\+?[A-Za-z0-9 .\-/&]+?(?=\.\s|\.?\s*Avl|\s+on\b|$)", r"\1[PLACE]", masked)
+        masked = re.sub(r"(CASH\s+DEP(?:OSIT)?\s+)[A-Za-z .\-]+?(?=\s+Val\b|[.,]|$)", r"\1[PLACE]", masked, flags=re.I)
 
-        shape = re.sub(r"[\dX]", "9", masked.lower())
+        shape = re.sub(r"[\dX]+", "9", masked)
         if shape in seen:
             dropped["Same format as one already kept"] += 1
             continue

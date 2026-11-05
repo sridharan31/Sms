@@ -94,6 +94,56 @@ class Classification(unittest.TestCase):
         self.assertIn("Foreign-currency", r["Edge-case note"])
 
 
+class RealWorldFormats(unittest.TestCase):
+    """Formats seen in real exports (text invented)."""
+
+    def test_free_text_and_people_masked(self):
+        cases = [
+            "INR 12,000.00 deposited to A/c No XX1234 towards 12345678901234 -TPT-Ti ravi Val 08-DEC-16.",
+            "INR 20,000.00 deposited to A/c No XX1234 towards anil.k@okicici-123456789012-Kumar Val 06-DEC-17.",
+            "INR 10,000.00 debited from A/c XX1234 on 02-JUL-18. Info: anil@okhdfcbank-PAY-123456789012-Rent for room. Avl bal:INR 1,000.00",
+            "Rs. 5000.00 has been paid to ravikumar by 9876543210. Wallet txn id is 12345678901.",
+            "Anil Kumar has sent Rs 5000 to your wallet. Upgrade your wallet.",
+            "Salary of INR 24,850.00 credited to A/c XX1234 towards SALARY ACME SOFTWARE PVT LTD Value 30-NOV-2016.",
+            "Paid Rs.50.00 to Acme Canteen Services at 1:38 PM. Wallet txn ID:12345678901",
+        ]
+        for body in cases:
+            masked = s.mask_text(body)
+            for secret in ("ravi", "anil", "Kumar", "Rent for room", "ACME", "Acme", "Anil"):
+                self.assertNotIn(secret, masked, masked)
+
+    def test_atm_place_masked(self):
+        r, _ = row("JD-HDFCBK", "Rs.2000.00 was withdrawn using your HDFC Bank Card ending 1234 on 2016-12-01:07:22:45 at +PALAVAKKAM. Avl bal: Rs.100.00")
+        self.assertNotIn("PALAVAKKAM", r["Masked message text (copy exactly, then mask)"])
+        self.assertIn("at [PLACE]", r["Masked message text (copy exactly, then mask)"])
+
+    def test_cashback_type(self):
+        self.assertEqual(s.classify("You've received Rs. 300 cashback from Flipkart into your PhonePe wallet.", "x")[0], "Cashback / reward")
+
+    def test_outstanding_masked(self):
+        self.assertNotIn("9588", s.mask_text("Rs.427.00 was spent on ur Card ending 1234 at MOTI MAHAL. curr o/s - Rs.9588.00"))
+
+    def test_loan_advert_dropped(self):
+        r, d = row("BZHDFCBK", "Get Insta Loan upto Rs.41250 Credited in 1 Second to savings a/c. Eligibility valid till 25-Mar. TC Apply.")
+        self.assertIsNone(r)
+
+    def test_wallet_and_transfer_types(self):
+        self.assertEqual(s.classify("Added Rs. 500 to your Paytm wallet. Get upto Rs 200 Cashback on Recharge", "x")[0], "Wallet top-up")
+        self.assertEqual(s.classify("Request received to send Rs. 5000.00 to ANIL BANK 123. Updated Wallet Balance", "x"), ("Debit", "Out"))
+        self.assertEqual(s.classify("Anil has sent Rs 5000 to your wallet.", "x"), ("Credit", "In"))
+        self.assertEqual(s.classify("Your A/C XX123 debited for Rs 50.00 Towards POS withdrawal", "x")[0], "Card purchase")
+        self.assertEqual(s.classify("NEFT txn for INR 8,000.00 has been credited to the beneficiary account", "HDFC Bank"), ("Debit", "Out"))
+
+
+class Senders(unittest.TestCase):
+    def test_sender_formats(self):
+        for sender in ("JD-HDFCBK", "JD-HDFCBK-S", "MDHdfcBk", "IMHDFCBK", "HDFCBK"):
+            self.assertEqual(s.identify_provider(sender, "")[0], "HDFC Bank", sender)
+        self.assertEqual(s.identify_provider("VKiPaytm", "")[0], s.UPI_APPS)
+        self.assertEqual(s.identify_provider("DMCANBNK", "")[0], "Canara Bank")
+        self.assertIsNone(s.identify_provider("AXHATHWY", "Bill of Rs 500 paid"))
+
+
 class Dedupe(unittest.TestCase):
     def test_same_format_kept_once(self):
         msgs = [("ENBD", f"Purchase of AED {n}.00 with Card ending 4321 at CARREFOUR on 03-11-2026", "") for n in (10, 20, 30)]
