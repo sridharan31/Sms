@@ -1,5 +1,6 @@
 # Never commit SMS exports or generated sample rows (personal data)
 *.xml
-sms_rows*.csv
+*.csv
 sms-backup*
 __pycache__/
+*.pyc
