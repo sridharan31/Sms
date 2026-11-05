@@ -135,6 +135,25 @@ class RealWorldFormats(unittest.TestCase):
         self.assertEqual(s.classify("NEFT txn for INR 8,000.00 has been credited to the beneficiary account", "HDFC Bank"), ("Debit", "Out"))
 
 
+class MultiLine(unittest.TestCase):
+    def test_card_alert_lines(self):
+        body = ("Credit Card Purchase\nCard No XXXX2222\nAED 345.00\nSKYWAYS TRAVEL DUBAI ARE\n01/01/26 10:00\n"
+                "Avl Bal AED 9876.00\nPay school fees in 12 instalments at 0% interest with no fees. Conditions apply.")
+        rows, _ = s.process([("", body, "")], "T", "Yes", "SMS", "2026-11-05", 0, True)
+        r = dict(zip(s.COLUMNS, rows[0]))
+        self.assertEqual((r["Txn type"], r["Amount (as written)"], r["Currency"]), ("Card purchase", "345.00", "AED"))
+        self.assertEqual(r["Merchant / counterparty"], "Skyways Travel")
+        self.assertIn("\nAED 345.00\n", r["Masked message text (copy exactly, then mask)"])
+        self.assertNotIn("2222", r["Masked message text (copy exactly, then mask)"])
+        self.assertNotIn("9876", r["Masked message text (copy exactly, then mask)"])
+
+    def test_idfc_formats(self):
+        r, _ = row("", "Monthly interest of INR.12.00 earned on your Savings A/c XX1111 has been credited. New bal: INR.5000.00. IDFC FIRST Bank")
+        self.assertEqual((r["Bank or provider"], r["Txn type"], r["Amount (as written)"]), ("IDFC FIRST Bank", "Interest", "12.00"))
+        r, _ = row("", "Your A/c XX1111 debited by Rs. 1,000.00 on 01/01/26; Mr RAJA K credited. RRN 123456789012. Team IDFC FIRST Bank")
+        self.assertNotIn("RAJA", r["Masked message text (copy exactly, then mask)"])
+
+
 class Senders(unittest.TestCase):
     def test_sender_formats(self):
         for sender in ("JD-HDFCBK", "JD-HDFCBK-S", "MDHdfcBk", "IMHDFCBK", "HDFCBK"):

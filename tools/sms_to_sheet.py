@@ -87,6 +87,7 @@ PROVIDERS = {
     "KOTAKB": ("Kotak Mahindra Bank", "India"), "KOTAK": ("Kotak Mahindra Bank", "India"),
     "FEDBNK": ("Federal Bank", "India"), "FEDBK": ("Federal Bank", "India"),
     "CANBNK": ("Canara Bank", "India"),
+    "IDFCFB": ("IDFC FIRST Bank", "India"), "IDFCBK": ("IDFC FIRST Bank", "India"), "IDFC": ("IDFC FIRST Bank", "India"),
     "BOBTXN": ("Bank of Baroda", "India"), "BOBSMS": ("Bank of Baroda", "India"),
     "BOBCRD": ("Bank of Baroda", "India"),
     "GPAY": (UPI_APPS, "India"), "GOOGLEPAY": (UPI_APPS, "India"),
@@ -101,7 +102,7 @@ BODY_NAMES = [
     (r"al\s*ansari", "ALANSARI"), (r"lulu\s*(exchange|money)", "LULU"), (r"\bwise\b", "WISE"),
     (r"\bSBI\b|state bank of india", "SBIINB"), (r"\bHDFC\b", "HDFCBK"), (r"\bICICI\b", "ICICIB"),
     (r"\baxis bank\b", "AXISBK"), (r"\bkotak\b", "KOTAKB"), (r"federal bank", "FEDBNK"),
-    (r"canara bank", "CANBNK"), (r"bank of baroda|\bBOB\b", "BOBTXN"),
+    (r"canara bank", "CANBNK"), (r"IDFC\s*FIRST", "IDFCFB"), (r"bank of baroda|\bBOB\b", "BOBTXN"),
 ]
 EXCHANGE_HOUSES = {"Al Ansari Exchange", "LuLu Exchange", "Wise"}
 
@@ -139,7 +140,7 @@ _NUM = r"\d{1,3}(?:,\d{2,3})+(?:\.\d{1,3})?|\d+(?:\.\d{1,3})?"
 _CUR = (r"AED|Dhs?\.?|DHS|INR|Rs\.?|₹|USD|US\$|\$|EUR|€|GBP|£|SAR|SR|QAR|OMR|KWD|BHD|"
         r"PHP|PKR|LKR|NPR|BDT|SGD|AUD|CAD")
 AMOUNT_RE = re.compile(
-    rf"(?P<c1>{_CUR})\s?(?P<n1>{_NUM})|(?P<n2>{_NUM})\s?(?P<c2>AED|INR|USD|EUR|GBP|SAR|Dhs|DHS|Rs)\b",
+    rf"(?P<c1>{_CUR})(?:(?<!\.)[.:])?[ \t]?(?P<n1>{_NUM})|(?P<n2>{_NUM})[ \t]?(?P<c2>AED|INR|USD|EUR|GBP|SAR|Dhs|DHS|Rs)\b",
     re.I,
 )
 CUR_MAP = {"aed": "AED", "dh": "AED", "dhs": "AED", "inr": "INR", "rs": "INR", "₹": "INR",
@@ -188,7 +189,7 @@ HARD_PROMO_RE = re.compile(r"eligib|T\s?&?\s?C\s+apply|insta(nt)?\s+(jumbo\s+)?l
 DONE_VERB_RE = re.compile(
     r"debited|credited|spent|purchase|withdrawn|received|sent|transferred|paid|refund|revers|"
     r"declin|failed|deducted|charged|deposited|cashback|mandate|autopay|pre-?auth|hold|blocked|"
-    r"converted|payment|remit",
+    r"converted|payment|remit|\bcr\b|\bdr\b|successful",
     re.I,
 )
 INFO_ONLY_RE = re.compile(r"\bmandate|auto-?pay|standing\s+instruction|e-?mandate", re.I)
@@ -205,7 +206,7 @@ PROTECT_RES = [
     re.compile(rf"\b\d{{1,2}}[- ]?(?:{MONTHS})[a-z]*[- ,]*\d{{2,4}}\b", re.I),
     re.compile(rf"\b(?:{MONTHS})[a-z]*[- ]\d{{1,2}},?[- ]\d{{2,4}}\b", re.I),
     re.compile(r"\b\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AP]M)?\b", re.I),
-    re.compile(r"\b(?:1800|1860)[\d -]{6,10}\d\b"),      # Indian toll-free helplines
+    re.compile(r"\b(?:1800|1860)[\d -]{3,10}\d\b"),      # Indian toll-free helplines
     re.compile(r"\b(?:600|800)\s?\d{2,3}\s?\d{3,4}\b"),  # UAE 600/800 helplines
 ]
 NAME_STOP = {
@@ -267,7 +268,8 @@ def _mask_name_after(m):
 
 def mask_text(text):
     """Mask personal data. Keeps transaction amounts, currencies, dates, times, wording."""
-    t = re.sub(r"\s+", " ", text).strip()
+    t = re.sub(r"[ \t]+", " ", text)
+    t = re.sub(r" *\n[ \n]*", "\n", t).strip()
     # links, e-mails, UPI IDs
     t = re.sub(r"\bhttps?://\S+|\bwww\.\S+|\b[\w-]+\.(?:com|in|ae|co|ly|me|io|net|org)/\S*", "[LINK]", t, flags=re.I)
     t = re.sub(r"\b[\w.+-]+@[\w-]+\.[\w.]+\b", "[EMAIL]", t)
@@ -275,6 +277,8 @@ def mask_text(text):
     # greetings and names after transfer words
     t = re.sub(r"\b(Dear|Hi|Hello)\s+(?!(Customer|Cardholder|Member|Sir|Madam|Valued|User|Client)\b)"
                r"[A-Za-z][A-Za-z.]*(\s+[A-Z][A-Za-z.]*){0,2}", r"\1 [NAME]", t)
+    # titled people, e.g. "; Mr RAJA K credited"
+    t = re.sub(r"\b(?:Mr|Mrs|Ms|Miss|Dr|Shri|Smt)\.?\s+[A-Z][A-Za-z.]*(?:\s+[A-Z][A-Za-z.]*){0,3}", "[NAME]", t)
     # free-text remarks and employer names
     t = re.sub(r"(-TPT-).*?(?=\s+Val\b|$)", r"\1[NOTE]", t)
     t = re.sub(r"(@[A-Za-z]{2,15}(?:-[A-Z]+)?-\d+-)[^.]*?(?=\s+Val\b|\.\s|$)", r"\1[NOTE]", t)
@@ -397,7 +401,8 @@ def classify(body, provider_name):
 
 TRAILING_PLACE = re.compile(
     r"\s+(DUBAI|ABU DHABI|SHARJAH|AJMAN|AL AIN|AE|ARE|UAE|IN|IND|INDIA|MUMBAI|DELHI|BANGALORE|BENGALURU|"
-    r"CHENNAI|KOCHI|HYDERABAD|PUNE|KOLKATA|US|USA|GB|GBR)$", re.I)
+    r"CHENNAI|KOCHI|HYDERABAD|PUNE|KOLKATA|US|USA|GB|GBR|ABUDHABI|ABU DHABI|AUH|DXB)$", re.I)
+PROMO_LINE_RE = re.compile(r"[^.\n]*(conditions apply|0% interest|instal+ments at|T&C|offer)[^.\n]*\.?", re.I)
 
 
 def merchant_of(masked, txn_type):
@@ -407,6 +412,17 @@ def merchant_of(masked, txn_type):
         return "ATM"
     m = re.search(r"\b(?:at|@)\s+(?P<m>[A-Za-z0-9*&.'\- ]{2,40}?)(?=\s+(?:on|dated|via|using|for|txn|with|ref|in|"
                   r"Avl|Avail|Bal|\d)\b|[.,;]|$)", masked)
+    if not m:
+        m = re.search(r";\s*(?P<m>[^;\[\]]{2,40}?)\s+credited\b", masked)
+    if not m:
+        m = re.search(r"Bill Payment of .{0,20}? for (?P<m>[A-Za-z][A-Za-z .&\-]{2,40}?)(?=\s+-|\s+for\b|[.,]|$)", masked)
+    if not m and "\n" in masked:
+        lines = masked.split("\n")
+        for i, line in enumerate(lines[:-1]):
+            if AMOUNT_RE.fullmatch(line.strip()) and re.search(r"[A-Za-z]{3}", lines[i + 1]) \
+                    and not AMOUNT_RE.search(lines[i + 1]):
+                m = re.match(r"(?P<m>.+)", lines[i + 1].strip())
+                break
     if not m and txn_type in ("Refund / reversal", "Partial refund", "Cashback / reward"):
         m = re.search(r"\bfrom\s+(?P<m>[A-Za-z0-9*&.'\- ]{2,40}?)(?=\s+(?:has|have|is|was|on|for|to|of|ref|into|in)\b|[.,;]|$)", masked)
     if m and not m.group("m").strip().startswith("["):
@@ -529,7 +545,7 @@ def process(messages, name, consent, source, today, per_bank_type, keep_unknown)
             continue
 
         bank, country = provider if provider else ("", "")
-        txn_type, direction = classify(body, bank)
+        txn_type, direction = classify(PROMO_LINE_RE.sub("", body), bank)
         amount, currency = (txn_amounts[0][2], txn_amounts[0][3]) if txn_amounts else ("", "")
         if not country:
             country = {"AED": "UAE", "INR": "India"}.get(currency, "Other")
