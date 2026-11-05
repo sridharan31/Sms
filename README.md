@@ -9,6 +9,10 @@ The project is in the research and planning stage. No app code has been written 
 - [Project research](docs/project-research.md): problem, users, modules, regulation, competitors, pricing
 - [Project development plan](docs/project-development-plan.md): step-by-step plan from idea validation to launch, including the AI-assisted development workflow
 
+## Tools
+
+- [`tools/sms_to_sheet.py`](tools/README.md): turns a phone's SMS export into masked rows for the data-collection sheet
+
 ## Skills
 
 The [Transmute framework](https://github.com/VoxTechnologies/transmute-framework) skills for Claude Code are installed in `.claude/skills/` (BRD, PRD, scaffold, implement, audits, deployment checks).
